@@ -1,4 +1,5 @@
 import Sound.Pulse.Simple
+import List
 
 samplesPerSecond :: (Num a) => a
 samplesPerSecond = 44100
@@ -19,7 +20,6 @@ class SpecializedSignal s where
     sanitize :: s -> [SafeValue]
 
 data FrequencySignal = FrequencySignal [SignalValue]
-data AmplitudeSignal = AmplitudeSignal [SignalValue]
 
 instance SpecializedSignal FrequencySignal where
     specialize (Signal sigvalues) = FrequencySignal sigvalues
@@ -28,6 +28,7 @@ instance SpecializedSignal FrequencySignal where
                                             | sigvalue > 20000 = 20000
                                             | otherwise = sigvalue
 
+data AmplitudeSignal = AmplitudeSignal [SignalValue]
 
 instance SpecializedSignal AmplitudeSignal where
     specialize (Signal sigvalues) = AmplitudeSignal sigvalues
@@ -51,7 +52,20 @@ osc_sin frequencySig amplitudeSig = toSignal [ampVal * (sin $ 2*pi*freqVal*(t/sa
     ampVals = sanitize amplitudeSig
     freqVals = sanitize frequencySig
 
-mySin = fromSignal $ takeSeconds 2 $ osc_sin (specialize $ toSignal [220.0, 220.002 ..]) (specialize $ toSignal [1.0, 0.999988 ..] )
+sig_adder :: [Signal] -> Signal
+sig_adder insignals = toSignal outvalues where
+    invalues = map fromSignal insignals
+    outvalues = map sum $ transpose invalues
+
+amp_lfo = sig_adder [(flatSignal 0.75), raw_lfo] where
+    raw_lfo = osc_sin (specialize $ flatSignal 2 ) (specialize $ flatSignal 0.5 )
+
+freq_lfo = sig_adder [(flatSignal 440), raw_lfo] where
+    raw_lfo = osc_sin (specialize $ flatSignal 5 ) (specialize $ flatSignal 50 )
+
+main_sin = osc_sin (specialize freq_lfo ) (specialize amp_lfo  )
+
+mySin = fromSignal $ takeSeconds 2 main_sin
 
 main=do
     s<-simpleNew Nothing "example" Play Nothing "this is an example application"
