@@ -1,0 +1,8 @@
+Typeclasses:
+Oscillator
+
+
+Instance:
+Num (I want to be able to add the output of the synths together)
+
+Then again there was the adder module.
