@@ -1,2 +1,2 @@
 #!/bin/sh
-ghc --make "$1".hs -hidir intermediate/ -odir intermediate/ && mv "$1" "$1".out
+ghc --make main.hs components.hs signals.hs -hidir intermediate/ -odir intermediate/ && mv main synth.out
