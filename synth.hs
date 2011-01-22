@@ -37,7 +37,14 @@ instance SpecializedSignal AmplitudeSignal where
                             | sigvalue > 1 = 1
                             | otherwise = sigvalue
 
+data SoundSignal = SoundSignal [SignalValue]
 
+instance SpecializedSignal SoundSignal where
+    specialize (Signal sigvalues) = SoundSignal sigvalues
+    sanitize (SoundSignal sigvalues) = map sanitize sigvalues where
+        sanitize (SignalValue sigvalue)   | sigvalue < -1 = -1
+                            | sigvalue > 1 = 1
+                            | otherwise = sigvalue
 
 toSignal :: [SafeValue] -> Signal
 toSignal values = Signal $ map SignalValue values
@@ -65,11 +72,14 @@ freq_lfo = sig_adder [(flatSignal 440), raw_lfo] where
 
 main_sin = osc_sin (specialize freq_lfo ) (specialize amp_lfo  )
 
-mySin = fromSignal $ takeSeconds 2 main_sin
+mySin = takeSeconds 2 main_sin
 
-main=do
+play :: SoundSignal -> IO ()
+play signal = do
     s<-simpleNew Nothing "example" Play Nothing "this is an example application"
         (SampleSpec (F32 LittleEndian) 44100 1) Nothing Nothing
-    simpleWrite s mySin
+    simpleWrite s $ sanitize signal 
     simpleDrain s
     simpleFree s
+
+main = play $ specialize mySin
