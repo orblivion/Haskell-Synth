@@ -1,0 +1,14 @@
+This is a synth in Haskell. I'm just getting started at this point. I'm also just learning Haskell.
+
+To get it working on Ubuntu Lucid:
+
+sudo apt-get install ghc6 # this is Haskell. It may take a while
+sudo apt-get install cabal-install # this is Haskell's library installer. a package manager in itself
+sudo apt-get install libpulse-dev # pulse audio development libraries
+
+cabal install pulse-simple  # an experimental Haskell bidning for pulseaudio. Note that you don't need sudo for this, it installs in ~/.cabal
+
+ghc --make synth.sh # make my program
+./synth.sh # run it. you should hear some sort of sound. hopefully nothing to offensive to your ears, I make no promises though! (turn down your speakers)
+
+Let me know if it doesn't work and I'll add the step I forgot!
