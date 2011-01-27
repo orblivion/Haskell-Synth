@@ -6,3 +6,20 @@ Instance:
 Num (I want to be able to add the output of the synths together)
 
 Then again there was the adder module.
+
+
+To Do:
+wave forms:
+    make construct
+    saw tooth
+    square pwm
+    triangle pwm
+lfos:
+    for this, have generic signal type of signal typeclass, so the restrictions pass on. ?
+
+envelopes.
+filters
+    fft
+
+file output
+file input

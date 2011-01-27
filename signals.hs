@@ -29,9 +29,11 @@ data AmplitudeSignal = AmplitudeSignal [SignalValue]
 instance SpecializedSignal AmplitudeSignal where
     specialize (Signal sigvalues) = AmplitudeSignal sigvalues
     sanitize (AmplitudeSignal sigvalues) = map sanitize sigvalues where
-        sanitize (SignalValue sigvalue)   | sigvalue < 0 = 0
-                            | sigvalue > 1 = 1
-                            | otherwise = sigvalue
+        sanitize (SignalValue sigvalue)  = sigvalue
+-- cut this out for now because of LFOs. maybe make that type carry over n shit
+--        sanitize (SignalValue sigvalue)   | sigvalue < 0 = 0
+--                            | sigvalue > 1 = 1
+--                            | otherwise = sigvalue
 
 data SoundSignal = SoundSignal [SignalValue]
 

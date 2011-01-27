@@ -17,13 +17,13 @@ type BasicOscillator = FrequencySignal -> AmplitudeSignal -> Signal
 --     ampVals = sanitize amplitudeSig
 --     freqVals = sanitize frequencySig
 
-osc_sawtooth :: BasicOscillator 
-osc_sawtooth frequencySig amplitudeSig = toSignal $ [ sawfunc t freqVal ampVal | (t, freqVal, ampVal) <- zip3 [0..] ampVals freqVals ] where
-    sawfunc :: Integer -> SafeValue -> SafeValue -> SafeValue
-    -- sawfunc t freqVal ampVal = -1 + ampVal * 2 * (fromIntegral $ mod (t*440) samplesPerSecond) / samplesPerSecond
-    sawfunc t freqVal ampVal = -1 + 2 * (fromIntegral $ mod (t*freqVal) samplesPerSecond) / samplesPerSecond
-    ampVals = sanitize amplitudeSig
-    freqVals = sanitize frequencySig
+-- osc_sawtooth :: BasicOscillator 
+-- osc_sawtooth frequencySig amplitudeSig = toSignal $ [ sawfunc t freqVal ampVal | (t, freqVal, ampVal) <- zip3 [0..] ampVals freqVals ] where
+--     sawfunc :: Integer -> SafeValue -> SafeValue -> SafeValue
+--     -- sawfunc t freqVal ampVal = -1 + ampVal * 2 * (fromIntegral $ mod (t*440) samplesPerSecond) / samplesPerSecond
+--     sawfunc t freqVal ampVal = -1 + 2 * (fromIntegral $ mod (t*freqVal) samplesPerSecond) / samplesPerSecond
+--     ampVals = sanitize amplitudeSig
+--     freqVals = sanitize frequencySig
 
 -- t = [-1 + (2*t)/samplesPerSecond] + val
     
@@ -32,6 +32,17 @@ osc_sawtooth frequencySig amplitudeSig = toSignal $ [ sawfunc t freqVal ampVal |
 -- osc_triangle :: BasicOscillator 
 -- osc_triangle frequencySig amplitudeSig = Signal osc_triangle_part frequencySig amplitudeSig 0 where
 --     osc_triangle_part frequencySig amplitudeSig t | t < halfway = ampVal * ( 
+
+
+osc_square :: BasicOscillator 
+osc_square frequencySig amplitudeSig = toSignal $ [ squarefunc t freqVal ampVal | (t, ampVal, freqVal) <- zip3 [0..] ampVals freqVals ] where
+    ampVals = sanitize amplitudeSig
+    freqVals = sanitize frequencySig
+    squarefunc :: SafeValue -> SafeValue -> SafeValue -> SafeValue
+    squarefunc t freqVal ampVal | (mod (floor $ t*freqVal) samplesPerSecond) < floor (toRational $ samplesPerSecond / 2) = ampVal
+                                | otherwise = 0 - ampVal
+
+
 
 
 osc_sine :: BasicOscillator 
