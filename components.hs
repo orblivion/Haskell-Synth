@@ -44,12 +44,10 @@ osc_square frequencySig amplitudeSig = toSignal $ [ squarefunc t freqVal ampVal 
 
 
 
-
 osc_sine :: BasicOscillator 
-osc_sine frequencySig amplitudeSig = toSignal [ampVal * (sin $ 2*pi*freqVal*(t/samplesPerSecond)) | (t, ampVal, freqVal) <- (zip3 [1..] ampVals freqVals)] where
+osc_sine frequencySig amplitudeSig = toSignal [(sin $ 2*pi*freqVal*(t/samplesPerSecond)) | (t, ampVal, freqVal) <- (zip3 [1..] ampVals freqVals)] where
     ampVals = sanitize amplitudeSig
     freqVals = sanitize frequencySig
-
 
 
 
@@ -58,6 +56,15 @@ sig_adder insignals = toSignal outvalues where
     invalues = map fromSignal insignals
     outvalues = map sum $ transpose invalues
 
+
+
+envelope :: [(SafeValue, Float)] -> Signal
+envelope points = toSignal $ envelope_ points 0 where
+    envelope_ points t  | t < (len * samplesPerSecond)   = (val + (t * slope)): envelope_ points (t + 1)
+                        | otherwise = envelope_ (tail points ) 0
+        where
+            (val, len):(next_val, _):_ = points
+            slope = (next_val - val) / (len * samplesPerSecond)
 
 
 

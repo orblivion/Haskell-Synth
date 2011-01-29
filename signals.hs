@@ -51,3 +51,5 @@ fromSignal :: Signal -> [SafeValue]
 fromSignal (Signal sigvals) = map fromSigVal sigvals where
     fromSigVal (SignalValue value) = value
 
+catSignals :: [Signal] -> Signal
+catSignals sigs = toSignal $ concat $ (map fromSignal sigs) where
