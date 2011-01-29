@@ -4,7 +4,53 @@ import Sound.Pulse.Simple
 import Signals
 import List
 
-type BasicOscillator = FrequencySignal -> AmplitudeSignal -> Signal
+type BasicOscillator = FrequencySignal -> AmplitudeSignal -> (Maybe PWMSignal) -> Signal
+
+-- TimeSamplingRate = TimeSamples/Time
+-- Frequency = NumCycles/Time
+-- Time * Frequency = NumCycles
+-- Time * SamplingRate = Samples
+-- CycleSamplingRate = CycleSamples/NumCycles
+
+data SamplingRate = SamplingRate Integer
+data Samples = Samples Integer
+data Progression = Progression Float
+data Output = Output SafeValue
+
+getProgression (Samples s) (SamplingRate sr) = Progression $ ((fromIntegral s) / (fromIntegral sr))
+getNumSamples (Progression p) (SamplingRate sr) = Samples $ floor $ p * fromIntegral sr
+
+data Time a = Time a
+data Cycle a = Cycle a
+data Frequency = Frequency SafeValue 
+data Amplitude = Amplitude SafeValue 
+
+timeFunc func  (Time val_a )   (Time val_b )    = Time $ func val_a val_b 
+cycleFunc func (Cycle val_a ) (Cycle val_b )  = Cycle $ func val_a val_b 
+
+toTime (Cycle (Progression cp)) (Frequency f) = toRational $ cp / f
+toCycle (Time (Progression tp)) (Frequency f) = tp * f
+
+fromOutput (Output o) (Amplitude a) = SignalValue $ o * a
+
+type BasicFunction = Cycle Progression -> Cycle Output
+
+
+-- oscillator :: BasicFunction -> BasicOscillator
+-- oscillator basicFunc fSig aSig pSig = oscillator_ basicFunc fSig aSig pSig 0 where
+--     fVals = sanitize fSig
+--     aVals = sanitize aSig
+--     pVals = sanitize pSig
+--     oscillator_ basicFunc fSign aSig pSig t | t >= samplesPerSecond = oscillator_ basicFunc fSign aSig pSig (sSub t samplesPerSecond)
+--                                             | otherwise = ( aVal * (basicFunc pVal t) ) : oscillator_ basicFunc fRest aRest pRest (sAdd t fVal) 
+--         where
+--             fVal:fRest = fVals
+--             aVal:aRest = aVals
+--             pVal:pRest = pVals
+        
+
+
+
 
 -- make types for all the different parts of the time equation so I don't get them messed up
 -- for instance, t will be of a type that has the domain -1 - 1. stuff like that
@@ -35,7 +81,7 @@ type BasicOscillator = FrequencySignal -> AmplitudeSignal -> Signal
 
 
 osc_square :: BasicOscillator 
-osc_square frequencySig amplitudeSig = toSignal $ [ squarefunc t freqVal ampVal | (t, ampVal, freqVal) <- zip3 [0..] ampVals freqVals ] where
+osc_square frequencySig amplitudeSig _ = toSignal $ [ squarefunc t freqVal ampVal | (t, ampVal, freqVal) <- zip3 [0..] ampVals freqVals ] where
     ampVals = sanitize amplitudeSig
     freqVals = sanitize frequencySig
     squarefunc :: SafeValue -> SafeValue -> SafeValue -> SafeValue
@@ -45,7 +91,7 @@ osc_square frequencySig amplitudeSig = toSignal $ [ squarefunc t freqVal ampVal 
 
 
 osc_sine :: BasicOscillator 
-osc_sine frequencySig amplitudeSig = toSignal [(sin $ 2*pi*freqVal*(t/samplesPerSecond)) | (t, ampVal, freqVal) <- (zip3 [1..] ampVals freqVals)] where
+osc_sine frequencySig amplitudeSig _ = toSignal [(sin $ 2*pi*freqVal*(t/samplesPerSecond)) | (t, ampVal, freqVal) <- (zip3 [1..] ampVals freqVals)] where
     ampVals = sanitize amplitudeSig
     freqVals = sanitize frequencySig
 

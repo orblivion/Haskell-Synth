@@ -9,7 +9,7 @@ data Signal = Signal [SignalValue]
 
 flatSignal val = toSignal [val, val..]
 
-takeSeconds s (Signal sigdata) = Signal $ take (s * samplesPerSecond) sigdata
+takeSeconds s (Signal sigdata) = Signal $ take (floor (s * samplesPerSecond)) sigdata
 
 class SpecializedSignal s where
     specialize :: Signal -> s
@@ -34,6 +34,17 @@ instance SpecializedSignal AmplitudeSignal where
 --        sanitize (SignalValue sigvalue)   | sigvalue < 0 = 0
 --                            | sigvalue > 1 = 1
 --                            | otherwise = sigvalue
+
+
+data PWMSignal = PWMSignal [SignalValue]
+
+instance SpecializedSignal PWMSignal where
+    specialize (Signal sigvalues) = PWMSignal sigvalues
+    sanitize (PWMSignal sigvalues) = map sanitize sigvalues where
+        sanitize (SignalValue sigvalue)   | sigvalue < -1 = -1
+                            | sigvalue > 1 = 1
+                            | otherwise = sigvalue
+
 
 data SoundSignal = SoundSignal [SignalValue]
 
