@@ -26,4 +26,4 @@ sine_sound = osc_sine (specialize freq_lfo ) (specialize amp_lfo  ) Nothing
 
 
 
-main = play $ specialize $ takeSeconds 4 $ osc_sine (specialize $ freq_lfo) (specialize $ amp_lfo ) Nothing
+main = play $ specialize $ takeSeconds 4 $ osc_sawtooth (specialize $ flatSignal 220) (specialize $ amp_lfo ) Nothing
