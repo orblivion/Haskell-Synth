@@ -15,9 +15,12 @@ type BasicOscillator = FrequencySignal -> AmplitudeSignal -> (Maybe PWMSignal) -
 data SamplingRate = SamplingRate Integer
 data Samples = Samples Integer
 data Progression = Progression Float
+data Slope = Slope Float
 
 getProgression (Samples s) (SamplingRate sr) = Progression $ ((fromIntegral s) / (fromIntegral sr))
 getNumSamples (Progression p) (SamplingRate sr) = Samples $ floor $ p * fromIntegral sr
+getSlope (Progression p) (SignalValue sv) = Slope $ (sv / p)
+signalValueFromSlope (Progression p) (Slope s) = SignalValue $ p * s
 
 data Cycle a = Cycle a
 data Frequency = Frequency SafeValue 
@@ -81,8 +84,12 @@ oscillator basicFunc fSig aSig (Just pSig) = Signal $ oscillator_ fVals aVals pV
 
 
 osc_square = oscillator basicFunc where
-    basicFunc (Cycle (Progression pw)) (Cycle (Progression t))  | t > pw = Cycle $ SignalValue 1
-                                                                | otherwise = Cycle $ SignalValue (-1)
+    basicFunc pw t  | t > pw = Cycle $ SignalValue 1
+                    | otherwise = Cycle $ SignalValue (-1)
+
+osc_sawtooth = oscillator basicFunc where
+    basicFunc _ t   = cycleFunc signalValueFromSlope t slope where
+	slope = cycleFunc getSlope (Cycle $ Progression 1) (Cycle $ SignalValue 1)
 
 
 -- make types for all the different parts of the time equation so I don't get them messed up
