@@ -25,38 +25,65 @@ data Amplitude = Amplitude SafeValue
 
 cycleFunc func (Cycle val_a ) (Cycle val_b )  = Cycle $ func val_a val_b 
 
-fromCycleProgression (Cycle (Progression cp)) (Frequency f) = Progression toRational $ cp / f
-toCycleProgression   (Progression tp) (Frequency f) = Cycle $ Progression $ tp * f
+fromCycleProgression (Cycle (Progression cp)) (Frequency f) = Progression (cp / f)
+toCycleProgression   (Progression tp) (Frequency f) = Cycle $ Progression (tp * f)
 
 fromCycleSignalValue (Cycle (SignalValue sv)) (Amplitude a) = SignalValue (sv * a)
 
 type BasicFunction = Cycle Progression -> Cycle Progression -> Cycle SignalValue
 
-square_basic :: BasicFunction
-square_basic (Cycle (Progression pw)) (Cycle (Progression t))  | t > pw = Cycle $ SignalValue 1
-                                                               | otherwise = Cycle $ SignalValue (-1)
+class Addable a where
+    (-:) :: a -> a -> a
+    (+:) :: a -> a -> a
 
-(-:) (Progression a) (Progression b) = Progression (a - b)
-(+:) (Progression a) (Progression b) = Progression (a + b)
+instance Addable Progression where 
+    (-:) (Progression a) (Progression b) = Progression (a - b)
+    (+:) (Progression a) (Progression b) = Progression (a + b)
+
+instance (Addable a) => Addable (Cycle a) where
+    (-:) (Cycle a) (Cycle b) = Cycle (a -: b)
+    (+:) (Cycle a) (Cycle b) = Cycle (a +: b)
+
+instance Eq Progression where
+    (==) (Progression a) (Progression b) = a == b
+
+instance (Eq a) => Eq (Cycle a) where
+    (==) (Cycle a) (Cycle b) = a == b
+
+instance Ord Progression where
+    compare (Progression a) (Progression b) = compare a b
+
+instance (Ord a) => Ord (Cycle a) where
+    compare (Cycle a) (Cycle b) = compare a b
+
+samplesPerCycle = Cycle $ SamplingRate 100000
 
 oscillator :: BasicFunction -> BasicOscillator
 oscillator basicFunc fSig aSig Nothing = oscillator basicFunc fSig aSig (Just $ specialize $ flatSignal 0.5)
-oscillator basicFunc fSig aSig (Just pSig) = oscillator_ fVals aVals pVals (Progression 0) where
+oscillator basicFunc fSig aSig (Just pSig) = Signal $ oscillator_ fVals aVals pVals (Cycle (Progression 0)) where
     fVals = sanitize fSig
     aVals = sanitize aSig
     pVals = sanitize pSig
-    oscillator_ :: [SafeValue] -> [SafeValue] -> [SafeValue] -> Progression -> Signal
-    oscillator_ fVals aVals pVals t | t >= samplesPerSecond = oscillator_ fVals aVals pVals (t -: samplesPerSecond)
-                                            | otherwise = (fromCycleSignalValue basicFunc_ (Amplitude aVal)): oscillatorRest
+    oscillator_ :: [SafeValue] -> [SafeValue] -> [SafeValue] -> Cycle Progression -> [SignalValue]
+    oscillator_ fVals aVals pVals t | t >= (Cycle $ Progression 1) = oscillator_ fVals aVals pVals $ t -: (Cycle $ Progression 1)
+				    | otherwise = (fromCycleSignalValue basicFunc_ (Amplitude aVal)): oscillatorRest
         where
             fVal:fRest = fVals
             aVal:aRest = aVals
             pVal:pRest = pVals
-            basicFunc_ = basicFunc (Cycle (Progression pVal)) (toCycleProgression t (Frequency fVal))
-            oscillatorRest = oscillator_ fRest aRest pRest (t +: -- adding 1? But then what am I cycling on? this is weird, again.
-                                                                 -- we're keepig state here, too. it's additive. maybe we should hold the
-                                                                 -- Cycle Progression in the oscillator function, not the Progression
-        
+
+            basicFunc_ = basicFunc (Cycle (Progression pVal)) t
+
+            oscillatorRest = oscillator_ fRest aRest pRest (t +: cycleProgressionDelta) 
+
+            progressionDelta = getProgression (Samples 1) (SamplingRate samplesPerSecond)
+            cycleProgressionDelta = toCycleProgression progressionDelta (Frequency fVal)
+
+
+osc_square_2 = oscillator basicFunc where
+    basicFunc (Cycle (Progression pw)) (Cycle (Progression t))  | t > pw = Cycle $ SignalValue 1
+                                                                | otherwise = Cycle $ SignalValue (-1)
+
 
 
 
