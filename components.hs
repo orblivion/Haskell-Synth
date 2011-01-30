@@ -81,8 +81,8 @@ oscillator basicFunc fSig aSig (Just pSig) = Signal $ oscillator_ fVals aVals pV
 
 
 osc_square = oscillator basicFunc where
-    basicFunc (Cycle (Progression pw)) (Cycle (Progression t))  | t > pw = Cycle $ SignalValue 1
-                                                                | otherwise = Cycle $ SignalValue (-1)
+    basicFunc (Cycle (Progression pw)) (Cycle (Progression t))  | t > pw = Cycle $ SignalValue 0.1
+                                                                | otherwise = Cycle $ SignalValue (-0.1)
 
 
 -- make types for all the different parts of the time equation so I don't get them messed up
