@@ -23,7 +23,8 @@ square_sequence = catSignals $ (map hit [440, 523.25, 659.26]) ++ [square_chorus
 square_sound = osc_square (specialize freq_lfo ) (specialize amp_lfo  ) Nothing
 sine_sound = osc_sine (specialize freq_lfo ) (specialize amp_lfo  ) Nothing
 
+pw_env = envelope [(0.5, 4), (1, 2), (1,20)]
+tri_sound = osc_triangle (specialize $ flatSignal 440) (specialize $ flatSignal 1 ) $ Just (specialize $ pw_env )
 
 
-
-main = play $ specialize $ takeSeconds 4 $ osc_sawtooth (specialize $ flatSignal 220) (specialize $ amp_lfo ) Nothing
+main = play $ specialize $ takeSeconds 4 $ tri_sound

@@ -88,21 +88,18 @@ oscillator basicFunc fSig aSig (Just pSig) = Signal $ oscillator_ fVals aVals pV
 
 
 osc_square = oscillator basicFunc where
-    basicFunc pw t  | t > pw = Cycle $ SignalValue 1
+    basicFunc pw t  | t < pw = Cycle $ SignalValue 1
                     | otherwise = Cycle $ SignalValue (-1)
 
-osc_sawtooth = oscillator basicFunc where
-    basicFunc _ t   = (cycleFunc signalValueFromSlope t slope) -: (Cycle $ SignalValue 1 )  where
-	slope = cycleFunc getSlope (Cycle $ Progression 1) (Cycle $ SignalValue 2)
-
-
 osc_triangle = oscillator basicFunc where
-    basicFunc pw t   | t > pw    = (cycleFunc signalValueFromSlope t upslope) -: (Cycle $ SignalValue 1 )
+    basicFunc pw t   | t < pw    = (cycleFunc signalValueFromSlope t upslope) -: (Cycle $ SignalValue 1 )
                      | otherwise = (cycleFunc signalValueFromSlope (t -: pw) downslope) +: (Cycle $ SignalValue 1 )
 	where
 		upslope = cycleFunc getSlope pw (Cycle $ SignalValue 2)
 		downslope = cycleFunc getSlope ((Cycle $ Progression 1) -: pw) (Cycle $ SignalValue (-2) )
 
+osc_sawtooth :: BasicOscillator
+osc_sawtooth fSig aSig _ = osc_triangle fSig aSig $ Just (specialize $ flatSignal 1)
 
 -- make types for all the different parts of the time equation so I don't get them messed up
 -- for instance, t will be of a type that has the domain -1 - 1. stuff like that
