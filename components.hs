@@ -80,12 +80,9 @@ oscillator basicFunc fSig aSig (Just pSig) = Signal $ oscillator_ fVals aVals pV
             cycleProgressionDelta = toCycleProgression progressionDelta (Frequency fVal)
 
 
-osc_square_2 = oscillator basicFunc where
+osc_square = oscillator basicFunc where
     basicFunc (Cycle (Progression pw)) (Cycle (Progression t))  | t > pw = Cycle $ SignalValue 1
                                                                 | otherwise = Cycle $ SignalValue (-1)
-
-
-
 
 
 -- make types for all the different parts of the time equation so I don't get them messed up
@@ -116,28 +113,15 @@ osc_square_2 = oscillator basicFunc where
 --     osc_triangle_part frequencySig amplitudeSig t | t < halfway = ampVal * ( 
 
 
-osc_square :: BasicOscillator 
-osc_square frequencySig amplitudeSig _ = toSignal $ [ squarefunc t freqVal ampVal | (t, ampVal, freqVal) <- zip3 [0..] ampVals freqVals ] where
-    ampVals = sanitize amplitudeSig
-    freqVals = sanitize frequencySig
-    squarefunc :: SafeValue -> SafeValue -> SafeValue -> SafeValue
-    squarefunc t freqVal ampVal | (mod (floor $ t*freqVal) samplesPerSecond) < floor (toRational $ samplesPerSecond / 2) = ampVal
-                                | otherwise = 0 - ampVal
 
-
-
-osc_sine :: BasicOscillator 
-osc_sine frequencySig amplitudeSig _ = toSignal [(sin $ 2*pi*freqVal*(t/samplesPerSecond)) | (t, ampVal, freqVal) <- (zip3 [1..] ampVals freqVals)] where
-    ampVals = sanitize amplitudeSig
-    freqVals = sanitize frequencySig
-
+osc_sine = oscillator basicFunc where
+	basicFunc _ (Cycle (Progression t)) = Cycle $ SignalValue $ sin (2 * pi * t)
 
 
 sig_adder :: [Signal] -> Signal
 sig_adder insignals = toSignal outvalues where
     invalues = map fromSignal insignals
     outvalues = map sum $ transpose invalues
-
 
 
 envelope :: [(SafeValue, Float)] -> Signal

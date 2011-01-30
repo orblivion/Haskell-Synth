@@ -20,6 +20,7 @@ lfos:
 envelopes.
 filters
     fft
+ring mod
 
 file output
 file input
