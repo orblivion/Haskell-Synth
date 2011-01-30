@@ -1,10 +1,9 @@
 import Components
 import Signals 
 
+lfo_env = envelope [(5, 4), (30, 10), (30, 20)]
 amp_lfo = osc_sine (specialize $ flatSignal 2 ) (specialize $ flatSignal 0.5) Nothing
-freq_lfo = osc_sine (specialize $ flatSignal 10 ) (specialize $ flatSignal 5 ) Nothing where
-
-
+freq_lfo = osc_sine (specialize $ lfo_env ) (specialize $ flatSignal 400 ) Nothing where
 
 
 
@@ -27,10 +26,4 @@ sine_sound = osc_sine (specialize freq_lfo ) (specialize amp_lfo  ) Nothing
 
 
 
-
-
-
-
-
-
-main = play $ specialize $ takeSeconds 4 $ square_sequence
+main = play $ specialize $ takeSeconds 4 $ osc_sine (specialize $ freq_lfo) (specialize $ amp_lfo ) Nothing

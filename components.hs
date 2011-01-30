@@ -91,7 +91,6 @@ osc_sawtooth = oscillator basicFunc where
     basicFunc _ t   = cycleFunc signalValueFromSlope t slope where
 	slope = cycleFunc getSlope (Cycle $ Progression 1) (Cycle $ SignalValue 1)
 
-
 -- make types for all the different parts of the time equation so I don't get them messed up
 -- for instance, t will be of a type that has the domain -1 - 1. stuff like that
 -- look up Haskell Fractional too in case that helps
