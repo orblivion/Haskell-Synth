@@ -15,38 +15,47 @@ type BasicOscillator = FrequencySignal -> AmplitudeSignal -> (Maybe PWMSignal) -
 data SamplingRate = SamplingRate Integer
 data Samples = Samples Integer
 data Progression = Progression Float
-data Output = Output SafeValue
 
 getProgression (Samples s) (SamplingRate sr) = Progression $ ((fromIntegral s) / (fromIntegral sr))
 getNumSamples (Progression p) (SamplingRate sr) = Samples $ floor $ p * fromIntegral sr
 
-data Time a = Time a
 data Cycle a = Cycle a
 data Frequency = Frequency SafeValue 
 data Amplitude = Amplitude SafeValue 
 
-timeFunc func  (Time val_a )   (Time val_b )    = Time $ func val_a val_b 
 cycleFunc func (Cycle val_a ) (Cycle val_b )  = Cycle $ func val_a val_b 
 
-toTime (Cycle (Progression cp)) (Frequency f) = toRational $ cp / f
-toCycle (Time (Progression tp)) (Frequency f) = tp * f
+fromCycleProgression (Cycle (Progression cp)) (Frequency f) = Progression toRational $ cp / f
+toCycleProgression   (Progression tp) (Frequency f) = Cycle $ Progression $ tp * f
 
-fromOutput (Output o) (Amplitude a) = SignalValue $ o * a
+fromCycleSignalValue (Cycle (SignalValue sv)) (Amplitude a) = SignalValue (sv * a)
 
-type BasicFunction = Cycle Progression -> Cycle Output
+type BasicFunction = Cycle Progression -> Cycle Progression -> Cycle SignalValue
 
+square_basic :: BasicFunction
+square_basic (Cycle (Progression pw)) (Cycle (Progression t))  | t > pw = Cycle $ SignalValue 1
+                                                               | otherwise = Cycle $ SignalValue (-1)
 
--- oscillator :: BasicFunction -> BasicOscillator
--- oscillator basicFunc fSig aSig pSig = oscillator_ basicFunc fSig aSig pSig 0 where
---     fVals = sanitize fSig
---     aVals = sanitize aSig
---     pVals = sanitize pSig
---     oscillator_ basicFunc fSign aSig pSig t | t >= samplesPerSecond = oscillator_ basicFunc fSign aSig pSig (sSub t samplesPerSecond)
---                                             | otherwise = ( aVal * (basicFunc pVal t) ) : oscillator_ basicFunc fRest aRest pRest (sAdd t fVal) 
---         where
---             fVal:fRest = fVals
---             aVal:aRest = aVals
---             pVal:pRest = pVals
+(-:) (Progression a) (Progression b) = Progression (a - b)
+(+:) (Progression a) (Progression b) = Progression (a + b)
+
+oscillator :: BasicFunction -> BasicOscillator
+oscillator basicFunc fSig aSig Nothing = oscillator basicFunc fSig aSig (Just $ specialize $ flatSignal 0.5)
+oscillator basicFunc fSig aSig (Just pSig) = oscillator_ fVals aVals pVals (Progression 0) where
+    fVals = sanitize fSig
+    aVals = sanitize aSig
+    pVals = sanitize pSig
+    oscillator_ :: [SafeValue] -> [SafeValue] -> [SafeValue] -> Progression -> Signal
+    oscillator_ fVals aVals pVals t | t >= samplesPerSecond = oscillator_ fVals aVals pVals (t -: samplesPerSecond)
+                                            | otherwise = (fromCycleSignalValue basicFunc_ (Amplitude aVal)): oscillatorRest
+        where
+            fVal:fRest = fVals
+            aVal:aRest = aVals
+            pVal:pRest = pVals
+            basicFunc_ = basicFunc (Cycle (Progression pVal)) (toCycleProgression t (Frequency fVal))
+            oscillatorRest = oscillator_ fRest aRest pRest (t +: -- adding 1? But then what am I cycling on? this is weird, again.
+                                                                 -- we're keepig state here, too. it's additive. maybe we should hold the
+                                                                 -- Cycle Progression in the oscillator function, not the Progression
         
 
 
