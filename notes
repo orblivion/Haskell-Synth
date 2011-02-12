@@ -11,9 +11,6 @@ Then again there was the adder module.
 To Do:
 wave forms:
     make construct
-    saw tooth
-    square pwm
-    triangle pwm
 lfos:
     for this, have generic signal type of signal typeclass, so the restrictions pass on. ?
 
@@ -24,3 +21,5 @@ ring mod
 
 file output
 file input
+
+yaml/json parser. have every object represent the function's output. for something like amplitude you can pass another structure to get its signal, or a number to do flatsignal.

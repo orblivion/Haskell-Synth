@@ -73,7 +73,7 @@ oscillator basicFunc fSig aSig (Just pSig) = Signal $ oscillator_ fVals aVals pV
     pVals = sanitize pSig
     oscillator_ :: [SafeValue] -> [SafeValue] -> [SafeValue] -> Cycle Progression -> [SignalValue]
     oscillator_ fVals aVals pVals t | t >= (Cycle $ Progression 1) = oscillator_ fVals aVals pVals $ t -: (Cycle $ Progression 1)
-				    | otherwise = (fromCycleSignalValue basicFunc_ (Amplitude aVal)): oscillatorRest
+                                    | otherwise = (fromCycleSignalValue basicFunc_ (Amplitude aVal)): oscillatorRest
         where
             fVal:fRest = fVals
             aVal:aRest = aVals
@@ -94,9 +94,9 @@ osc_square = oscillator basicFunc where
 osc_triangle = oscillator basicFunc where
     basicFunc pw t   | t < pw    = (cycleFunc signalValueFromSlope t upslope) -: (Cycle $ SignalValue 1 )
                      | otherwise = (cycleFunc signalValueFromSlope (t -: pw) downslope) +: (Cycle $ SignalValue 1 )
-	where
-		upslope = cycleFunc getSlope pw (Cycle $ SignalValue 2)
-		downslope = cycleFunc getSlope ((Cycle $ Progression 1) -: pw) (Cycle $ SignalValue (-2) )
+        where
+            upslope = cycleFunc getSlope pw (Cycle $ SignalValue 2)
+            downslope = cycleFunc getSlope ((Cycle $ Progression 1) -: pw) (Cycle $ SignalValue (-2) )
 
 osc_sawtooth :: BasicOscillator
 osc_sawtooth fSig aSig _ = osc_triangle fSig aSig $ Just (specialize $ flatSignal 1)
@@ -131,7 +131,7 @@ osc_sawtooth fSig aSig _ = osc_triangle fSig aSig $ Just (specialize $ flatSigna
 
 
 osc_sine = oscillator basicFunc where
-	basicFunc _ (Cycle (Progression t)) = Cycle $ SignalValue $ sin (2 * pi * t)
+    basicFunc _ (Cycle (Progression t)) = Cycle $ SignalValue $ sin (2 * pi * t)
 
 
 sig_adder :: [Signal] -> Signal
@@ -140,14 +140,23 @@ sig_adder insignals = toSignal outvalues where
     outvalues = map sum $ transpose invalues
 
 
-envelope :: [(SafeValue, Float)] -> Signal
-envelope points = toSignal $ envelope_ points 0 where
-    envelope_ points t  | t < (len * samplesPerSecond)   = (val + (t * slope)): envelope_ points (t + 1)
+envelope :: ([(SafeValue, Float)] -> Float -> SafeValue) -> [(SafeValue, Float)]  -> Signal
+envelope envFunc points = toSignal $ envelope_ points 0 where
+    envelope_ points t  | t < (len * samplesPerSecond) = (envFunc points t): envelope_ points (t + 1)
                         | otherwise = envelope_ (tail points ) 0
+        where
+            (val, len):(next_val, _):_ = points
+
+slideEnvelope = envelope func where
+    func points t = (val + (t * slope))
         where
             (val, len):(next_val, _):_ = points
             slope = (next_val - val) / (len * samplesPerSecond)
 
+stepEnvelope = envelope func where
+    func points _ = val
+        where
+            (val, len):_ = points
 
 
 play :: SoundSignal -> IO ()
