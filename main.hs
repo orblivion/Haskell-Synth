@@ -38,6 +38,7 @@ amp_env = stepEnvelope $ cycle $ concat [
     eighth_on, quarter_on, eighth_on, quarter_off, sixteenth_on, sixteenth_on, eighth_off 
     ]
 
-tri_sound = osc_triangle (specialize $ sig_adder [(flatSignal 110), freq_lfo ]) (specialize $ amp_env ) $ Just (specialize $ pw_env )
+tri_sound = osc_triangle (specialize $ sig_adder [(flatSignal 110), freq_lfo ]) (specialize $ flatSignal 0.5 ) $ Just (specialize $ pw_env )
 
-main = play $ specialize $ takeSeconds 4 $ tri_sound
+-- main = play $ specialize $ takeSeconds 4 $ tri_sound
+main = writeSound (specialize $ takeSeconds 4 $ tri_sound) "out.wav"

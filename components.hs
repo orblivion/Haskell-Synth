@@ -4,6 +4,12 @@ import Sound.Pulse.Simple
 import Signals
 import List
 
+import qualified Data.Vector.Generic as V
+import qualified Sound.File.Sndfile as SF
+import qualified Sound.File.Sndfile.Buffer.Vector as BV
+
+import Sound.File.Sndfile
+
 type BasicOscillator = FrequencySignal -> AmplitudeSignal -> (Maybe PWMSignal) -> Signal
 
 -- TimeSamplingRate = TimeSamples/Time
@@ -167,3 +173,10 @@ play signal = do
     simpleDrain s
     simpleFree s
 
+
+fileinfo = Info {frames = 1000, samplerate = 44100, channels = 1, seekable = False, format=Format {headerFormat =SF.HeaderFormatWav, sampleFormat = SF.SampleFormatPcm16, endianFormat = SF.EndianLittle }, sections = 1  } 
+
+writeSound :: SoundSignal -> FilePath -> IO ()
+writeSound signal outPath = do
+    SF.writeFile fileinfo outPath $ BV.toBuffer $ V.fromList $ sanitize signal
+    return ()
