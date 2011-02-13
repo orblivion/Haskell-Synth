@@ -9,10 +9,13 @@ Then again there was the adder module.
 
 
 To Do:
-Apply new basic wave types to everything. For instance, have AmplitudeSignal carry Amplitudes. Specialize/Sanitize should now be one process.
+    Apply new basic wave types to everything. For instance, have AmplitudeSignal carry Amplitudes. Specialize/Sanitize should now be one process.
 lfos:
     for this, have generic signal type of signal typeclass, so the restrictions pass on. ?
-Make signals carry Maybe Signalvalues. So they can end.
+
+Signal can be DeadSignal. So that it can be treated appropriately. Sometimes you don't want to treat it as zero methinks.
+    blahSignal Signal [oneItem] = whatever ++ DeadSignal
+Then make all components and functions that end, safe like that. 
 
 envelopes.
 filters

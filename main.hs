@@ -33,7 +33,7 @@ pw_env = slideEnvelope [(0.8, 4), (1, 2), (1,20)]
 
 tri_sound pitch = osc_triangle (specialize $ sig_adder [(flatSignal pitch), freq_lfo ]) (specialize $ flatSignal 0.5 ) $ Just (specialize $ pw_env )
 
-tri_chorus = sig_adder $ map tri_sound [ 300, 301 ]
+tri_chorus = sig_sequencer [([tri_sound 150], Progression 0), ([tri_sound 320], Progression 2)]
 
 -- main = play $ specialize $ takeSeconds 4 $ tri_sound
-main = writeSound (specialize $ takeSeconds 4 $ tri_chorus) "out.wav"
+main = writeSound (specialize $ takeSeconds 6 $ tri_chorus) "out.wav"
