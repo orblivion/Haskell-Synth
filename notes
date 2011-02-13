@@ -16,6 +16,7 @@ lfos:
 Signal can be DeadSignal. So that it can be treated appropriately. Sometimes you don't want to treat it as zero methinks.
     blahSignal Signal [oneItem] = whatever ++ DeadSignal
 Then make all components and functions that end, safe like that. 
+define clearEmptySignals
 
 envelopes.
 filters

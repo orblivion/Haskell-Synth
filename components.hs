@@ -127,18 +127,19 @@ osc_sine = oscillator basicFunc where
 sig_adder :: [Signal] -> Signal
 sig_adder insignals = toSignal outvalues where
     invalues = map fromSignal insignals
+
+    -- transpose will automatically shrink the resultant lists as signals end. and sum of an empty list is safely zero
+    -- in other words, any signals that go through sig_adder, we don't need to worry about them ending. saves a lot of headache.
     outvalues = map sum $ transpose invalues 
 
--- transpose will automatically shrink the resultant lists as signals end. and sum of an empty list is safely zero
--- in other words, any signals that go through sig_adder, we don't need to worry about them ending. saves a lot of headache.
 
-sig_sequencer :: [([Signal], Progression)] -> Signal
-sig_sequencer sequenceData = sig_sequencer' sequenceData [] where
-    sig_sequencer' :: [([Signal], Progression)] -> [Signal] -> Signal
-    sig_sequencer' [] existingSignals = sig_adder existingSignals where
-    sig_sequencer' ((newSignals, startingDelay):nextSeq) existingSignals = catSignals [beforeNewSignals, afterNewSignals] where
+sig_sequence :: [([Signal], Progression)] -> Signal
+sig_sequence sequenceData = sig_sequence' sequenceData [] where
+    sig_sequence' :: [([Signal], Progression)] -> [Signal] -> Signal
+    sig_sequence' [] existingSignals = sig_adder existingSignals where
+    sig_sequence' ((newSignals, startingDelay):nextSeq) existingSignals = catSignals [beforeNewSignals, afterNewSignals] where
         beforeNewSignals = (takeSeconds startingSeconds $ sig_adder existingSignals) 
-        afterNewSignals  = sig_sequencer' nextSeq ( remainingOldSignals ++ newSignals ) where
+        afterNewSignals  = sig_sequence' nextSeq ( remainingOldSignals ++ newSignals ) where
             remainingOldSignals = clearEmptySignals $ map (dropSeconds startingSeconds) existingSignals
         Progression startingSeconds = startingDelay
 
