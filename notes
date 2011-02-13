@@ -9,17 +9,18 @@ Then again there was the adder module.
 
 
 To Do:
-wave forms:
-    make construct
+Apply new basic wave types to everything. For instance, have AmplitudeSignal carry Amplitudes. Specialize/Sanitize should now be one process.
 lfos:
     for this, have generic signal type of signal typeclass, so the restrictions pass on. ?
+Make signals carry Maybe Signalvalues. So they can end.
 
 envelopes.
 filters
     fft
 ring mod
 
-file output
 file input
+
+Instruments. Control signals.
 
 yaml/json parser. have every object represent the function's output. for something like amplitude you can pass another structure to get its signal, or a number to do flatsignal.

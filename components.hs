@@ -12,6 +12,10 @@ import Sound.File.Sndfile
 
 type BasicOscillator = FrequencySignal -> AmplitudeSignal -> (Maybe PWMSignal) -> Signal
 
+--------------------------------------
+-- Raw Signal Generation Components
+--------------------------------------
+
 -- TimeSamplingRate = TimeSamples/Time
 -- Frequency = NumCycles/Time
 -- Time * Frequency = NumCycles
@@ -107,44 +111,35 @@ osc_triangle = oscillator basicFunc where
 osc_sawtooth :: BasicOscillator
 osc_sawtooth fSig aSig _ = osc_triangle fSig aSig $ Just (specialize $ flatSignal 1)
 
--- make types for all the different parts of the time equation so I don't get them messed up
--- for instance, t will be of a type that has the domain -1 - 1. stuff like that
--- look up Haskell Fractional too in case that helps
-
--- osc_sawtooth :: BasicOscillator 
--- osc_sawtooth frequencySig amplitudeSig = toSignal [ampVal * (sawfunc $ freqVal*(t/samplesPerSecond)) | (t, ampVal, freqVal) <- (zip3 timeloop ampVals freqVals)] where
---     sawfunc time = time
---     timeloop = [0 .. samplesPerSecond - 1] ++ timeloop
---     ampVals = sanitize amplitudeSig
---     freqVals = sanitize frequencySig
-
--- osc_sawtooth :: BasicOscillator 
--- osc_sawtooth frequencySig amplitudeSig = toSignal $ [ sawfunc t freqVal ampVal | (t, freqVal, ampVal) <- zip3 [0..] ampVals freqVals ] where
---     sawfunc :: Integer -> SafeValue -> SafeValue -> SafeValue
---     -- sawfunc t freqVal ampVal = -1 + ampVal * 2 * (fromIntegral $ mod (t*440) samplesPerSecond) / samplesPerSecond
---     sawfunc t freqVal ampVal = -1 + 2 * (fromIntegral $ mod (t*freqVal) samplesPerSecond) / samplesPerSecond
---     ampVals = sanitize amplitudeSig
---     freqVals = sanitize frequencySig
-
--- t = [-1 + (2*t)/samplesPerSecond] + val
-    
-
-
--- osc_triangle :: BasicOscillator 
--- osc_triangle frequencySig amplitudeSig = Signal osc_triangle_part frequencySig amplitudeSig 0 where
---     osc_triangle_part frequencySig amplitudeSig t | t < halfway = ampVal * ( 
-
-
-
 osc_sine = oscillator basicFunc where
     basicFunc _ (Cycle (Progression t)) = Cycle $ SignalValue $ sin (2 * pi * t)
+
+
+
+
+
+
+--------------------------------------
+-- Basic Signal Manipulation Components
+--------------------------------------
 
 
 sig_adder :: [Signal] -> Signal
 sig_adder insignals = toSignal outvalues where
     invalues = map fromSignal insignals
-    outvalues = map sum $ transpose invalues
+    outvalues = map sum $ transpose invalues 
 
+-- transpose will automatically shrink the resultant lists as signals end. and sum of an empty list is safely zero
+-- in other words, any signals that go through sig_adder, we don't need to worry about them ending. saves a lot of headache.
+
+sig_sequencer :: [([Signal], Progression)] -> Signal
+sig_sequencer sequenceData = sig_sequencer' sequenceData [] where
+    sig_sequencer' :: [([Signal], Progression)] -> [Signal] -> Signal
+    sig_sequencer' ([(newSignals, startingDelay)]:nextSeq) existingSignals = catSignals [beforeNewSignals, afterNewSignals] where
+        beforeNewSignals = (takeSeconds startingSeconds $ sig_adder existingSignals) 
+        afterNewSignals  = sig_sequencer' nextSeq ( remainingOldSignals ++ newSignals ) where
+            remainingOldSignals = clearEmptySignals $ map (dropSeconds startingSeconds) existingSignals
+        Progression startingSeconds = startingDelay
 
 envelope :: ([(SafeValue, Float)] -> Float -> SafeValue) -> [(SafeValue, Float)]  -> Signal
 envelope envFunc points = toSignal $ envelope_ points 0 where
@@ -165,6 +160,29 @@ stepEnvelope = envelope func where
             (val, len):_ = points
 
 
+
+
+
+
+--------------------------------------
+-- Sequencing Components
+--------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------
+-- Sound Output Components
+--------------------------------------
+
+
 play :: SoundSignal -> IO ()
 play signal = do
     s<-simpleNew Nothing "example" Play Nothing "this is an example application"
@@ -180,3 +198,4 @@ writeSound :: SoundSignal -> FilePath -> IO ()
 writeSound signal outPath = do
     SF.writeFile fileinfo outPath $ BV.toBuffer $ V.fromList $ sanitize signal
     return ()
+

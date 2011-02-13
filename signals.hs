@@ -9,7 +9,9 @@ data Signal = Signal [SignalValue]
 
 flatSignal val = toSignal [val, val..]
 
+-- Need to make this be ok with signals that end pretty soon or I'll be in trouble.
 takeSeconds s (Signal sigdata) = Signal $ take (floor (s * samplesPerSecond)) sigdata
+dropSeconds s (Signal sigdata) = Signal $ drop (floor (s * samplesPerSecond)) sigdata
 
 class SpecializedSignal s where
     specialize :: Signal -> s
@@ -64,3 +66,6 @@ fromSignal (Signal sigvals) = map fromSigVal sigvals where
 
 catSignals :: [Signal] -> Signal
 catSignals sigs = toSignal $ concat $ (map fromSignal sigs) where
+
+
+clearEmptySignals signals = signals -- eventually as a memory saving technique I want to use this. for now it's just a reminder.
