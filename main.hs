@@ -36,20 +36,28 @@ kick_instr sequence = sig_sequence $ map toSigSequence sequence where
     toSigSequence progression = ([kick], progression)
     kick = osc_triangle (specialize f_env) (specialize a_env) Nothing where
     f_env = slideEnvelope [(100, 0.1), (20, 100), (20, 100)]
-    a_env = slideEnvelope [(0, 0.001), (0.2,0.1), (0,0.5), (0,100), (0, 100)]
+    a_env = slideEnvelope [(0, 0.001), (0.4,0.1), (0,0.5), (0,100), (0, 100)]
 
-kick_sequence = kick_instr $ cycle [ Progression 0.1, Progression 0.2, Progression 0.4, Progression 0.2, Progression 0.4, Progression 0.2, Progression 0.1]
 
 chime_instr sequence = sig_sequence $ map toSigSequence sequence where
     toSigSequence progression = ([chime], progression)
     chime = osc_triangle (specialize $ flatSignal 5000) (specialize $ sig_adder [a_env, a_lfo]) (Just (specialize $ flatSignal 0.95))
-    a_env = slideEnvelope [(0, 0.001), (0.2,0.5), (0.1,2), (0,100), (0, 100)]
+    a_env = slideEnvelope [(0, 0.001), (0.1,0.5), (0.05,2), (0,100), (0, 100)]
     a_lfo = osc_sine (specialize $ flatSignal 3) (specialize a_env) Nothing where
-        a_env = slideEnvelope [(0.1, 2.5), (0, 100), (0, 100)]
+        a_env = slideEnvelope [(0.05, 2.5), (0, 100), (0, 100)]
 
-chime_sequence = chime_instr $ [Progression 0.2, Progression 0.2, Progression 0.4, Progression 0.4 ] ++ repeat ( Progression 1.6 )
+bass_instr sequence = catSignals $ map bass sequence where
+    bass (pitch, Progression p) = takeSeconds p $ osc_triangle (specialize $ sig_adder [freq pitch]) (amp p) (Just $ specialize $ flatSignal 0.8)
+    freq pitch = flatSignal pitch
+    freq_lfo = osc_triangle (specialize $ flatSignal 15) (specialize $ flatSignal 5) Nothing
+    amp p = specialize $ slideEnvelope [ (0, 0.001), (0.4, p - 0.2), (0.4,0.2), (0,100), (0,100) ]
 
-the_sound = specialize $ takeSeconds 6 $ chime_sequence -- sig_adder $ [chime_sequence, kick_sequence]
+
+kick_sequence = kick_instr $ (Progression 0):( cycle [ Progression 0.2, Progression 0.4, Progression 0.2, Progression 0.4, Progression 0.2, Progression 0.1, Progression 0.1])
+chime_sequence = chime_instr $ [Progression 1 ] ++ repeat ( Progression 1.6 )
+bass_sequence = bass_instr $ cycle [ (41.2, Progression 0.6), (41.2, Progression 0.6),  (43.65, Progression 0.4) ]
+
+the_sound = specialize $ takeSeconds 6 $ sig_adder $ [chime_sequence, kick_sequence, bass_sequence]
 
 main = writeSound the_sound "out.wav"
 -- main = play the_sound

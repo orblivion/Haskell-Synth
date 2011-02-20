@@ -12,6 +12,7 @@ To Do:
     Apply new basic wave types to everything. For instance, have AmplitudeSignal carry Amplitudes. Specialize/Sanitize should now be one process.
 lfos:
     for this, have generic signal type of signal typeclass, so the restrictions pass on. ?
+    make it so that they can end safely
 
 Signal can be DeadSignal. So that it can be treated appropriately. Sometimes you don't want to treat it as zero methinks.
     blahSignal Signal [oneItem] = whatever ++ DeadSignal
@@ -26,5 +27,6 @@ ring mod
 file input
 
 Instruments. Control signals.
+ different control signal types. one where i specify a specific time. ones where I specify in how this one starts. one where I specify how long this one will last.
 
 yaml/json parser. have every object represent the function's output. for something like amplitude you can pass another structure to get its signal, or a number to do flatsignal.
