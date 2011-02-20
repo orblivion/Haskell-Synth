@@ -136,7 +136,7 @@ sig_adder insignals = toSignal outvalues where
 sig_sequence :: [([Signal], Progression)] -> Signal
 sig_sequence sequenceData = sig_sequence' sequenceData [] where
     sig_sequence' :: [([Signal], Progression)] -> [Signal] -> Signal
-    sig_sequence' [] existingSignals = sig_adder existingSignals where
+    sig_sequence' [] existingSignals = sig_adder existingSignals
     sig_sequence' ((newSignals, startingDelay):nextSeq) existingSignals = catSignals [beforeNewSignals, afterNewSignals] where
         beforeNewSignals = (takeSeconds startingSeconds $ sig_adder existingSignals) 
         afterNewSignals  = sig_sequence' nextSeq ( remainingOldSignals ++ newSignals ) where
