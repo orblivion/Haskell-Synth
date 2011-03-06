@@ -5,10 +5,14 @@ To get it working on Ubuntu Lucid:
 sudo apt-get install ghc6 # this is Haskell. It may take a while
 sudo apt-get install cabal-install # this is Haskell's library installer. a package manager in itself
 sudo apt-get install libpulse-dev # pulse audio development libraries
+sudo apt-get install libsndfile-dev # for sound output
 
 cabal install pulse-simple  # an experimental Haskell bidning for pulseaudio. Note that you don't need sudo for this, it installs in ~/.cabal
+cabal install hsndfile  # an experimental Haskell bidning for pulseaudio. Note that you don't need sudo for this, it installs in ~/.cabal
 
 ./build.sh
 ./synth.sh # run it. you should hear some sort of sound. hopefully nothing to offensive to your ears, I make no promises though! (turn down your speakers)
+
+Some revisions so far output the file, some play via pulseaudio, which is why this depends on both. You can see in the code how to do either, it's not a big difference.
 
 Let me know if it doesn't work and I'll add the step I forgot!
