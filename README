@@ -16,3 +16,14 @@ cabal install hsndfile  # an experimental Haskell bidning for pulseaudio. Note t
 Some revisions so far output the file, some play via pulseaudio, which is why this depends on both. You can see in the code how to do either, it's not a big difference.
 
 Let me know if it doesn't work and I'll add the step I forgot!
+
+
+Example Output:
+
+Here's more or less the first real beat I made. This was the hardcoded output at one point. I'm too lazy to find which revision number it was:
+
+http://static.danielkrol.com/assorted/synth/beat.ogg
+
+Added the closest thing I could to a hi hat. More like a tweet, but it serves about the same purpose:
+
+http://static.danielkrol.com/assorted/synth/beatwithhats.ogg
