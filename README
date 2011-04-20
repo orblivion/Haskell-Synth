@@ -7,8 +7,11 @@ sudo apt-get install cabal-install # this is Haskell's library installer. a pack
 sudo apt-get install libpulse-dev # pulse audio development libraries
 sudo apt-get install libsndfile-dev # for sound output
 
-cabal install pulse-simple  # an experimental Haskell bidning for pulseaudio. Note that you don't need sudo for this, it installs in ~/.cabal
-cabal install hsndfile  # an experimental Haskell bidning for pulseaudio. Note that you don't need sudo for this, it installs in ~/.cabal
+# an experimental Haskell bidning for pulseaudio. Note that you don't need sudo for this, it installs in ~/.cabal
+cabal install pulse-simple  
+
+# a Haskell bidning for libsndfile. Note that you don't need sudo for this, it installs in ~/.cabal
+cabal install hsndfile  
 
 ./build.sh
 ./synth.sh # run it. you should hear some sort of sound. hopefully nothing to offensive to your ears, I make no promises though! (turn down your speakers)
