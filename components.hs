@@ -185,14 +185,15 @@ stepEnvelope = envelope func where
 -- Sound Output Components
 --------------------------------------
 
-buffersize = 30000
+buffersize = 1000
 
 outputSound s [] = do
     return ()
 outputSound s signal = do
-    simpleWrite s (take buffersize signal)
---    CC.forkIO ( outputSound s (drop buffersize signal) )
-    outputSound s (drop buffersize signal)
+    let !buffer = take buffersize signal
+    let rest = drop buffersize signal
+    CC.forkIO ( simpleWrite s buffer ) >> do 
+        outputSound s rest
 
 play :: SoundSignal -> IO ()
 play soundSignal = do

@@ -55,9 +55,9 @@ bass_instr sequence = catSignals $ map bass sequence where
 
 kick_sequence = kick_instr $ (Progression 0):( cycle [ Progression 0.2, Progression 0.4, Progression 0.2, Progression 0.4, Progression 0.2, Progression 0.1, Progression 0.1])
 chime_sequence = chime_instr $ [Progression 1 ] ++ repeat ( Progression 1.6 )
-bass_sequence = bass_instr $ cycle [ (41.2, Progression 0.6), (41.2, Progression 0.6),  (43.65, Progression 0.4) ]
+bass_sequence = bass_instr $ cycle [ (41.2, Progression 0.2), (41.2, Progression 0.6),  (43.65, Progression 0.4),  (38.8, Progression 0.4) ]
 
-the_sound = specialize $ takeSeconds 6 $ sig_adder $ [chime_sequence, kick_sequence, bass_sequence]
+the_sound = specialize $ sig_adder $ [bass_sequence]
 
 -- main = writeSound the_sound "out.wav"
 main = play the_sound
