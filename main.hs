@@ -59,5 +59,5 @@ bass_sequence = bass_instr $ cycle [ (41.2, Progression 0.6), (41.2, Progression
 
 the_sound = specialize $ takeSeconds 6 $ sig_adder $ [chime_sequence, kick_sequence, bass_sequence]
 
-main = writeSound the_sound "out.wav"
--- main = play the_sound
+-- main = writeSound the_sound "out.wav"
+main = play the_sound

@@ -7,6 +7,7 @@ import List
 import qualified Data.Vector.Generic as V
 import qualified Sound.File.Sndfile as SF
 import qualified Sound.File.Sndfile.Buffer.Vector as BV
+import qualified Control.Concurrent as CC
 
 import Sound.File.Sndfile
 
@@ -184,12 +185,20 @@ stepEnvelope = envelope func where
 -- Sound Output Components
 --------------------------------------
 
+buffersize = 30000
+
+outputSound s [] = do
+    return ()
+outputSound s signal = do
+    simpleWrite s (take buffersize signal)
+--    CC.forkIO ( outputSound s (drop buffersize signal) )
+    outputSound s (drop buffersize signal)
 
 play :: SoundSignal -> IO ()
-play signal = do
+play soundSignal = do
     s<-simpleNew Nothing "example" Play Nothing "this is an example application"
         (SampleSpec (F32 LittleEndian) 44100 1) Nothing Nothing
-    simpleWrite s $ sanitize signal 
+    outputSound s (sanitize soundSignal)
     simpleDrain s
     simpleFree s
 
