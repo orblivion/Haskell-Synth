@@ -185,7 +185,11 @@ stepEnvelope = envelope func where
 -- Sound Output Components
 --------------------------------------
 
+-- Mixer Output
+
 buffersize = 1000
+
+initPulse = simpleNew Nothing "example" Play Nothing "this is an example application" (SampleSpec (F32 LittleEndian) 44100 1) Nothing Nothing
 
 outputSound s [] = do
     return ()
@@ -195,14 +199,23 @@ outputSound s signal = do
     CC.forkIO ( simpleWrite s buffer ) >> do 
         outputSound s rest
 
-play :: SoundSignal -> IO ()
-play soundSignal = do
-    s<-simpleNew Nothing "example" Play Nothing "this is an example application"
-        (SampleSpec (F32 LittleEndian) 44100 1) Nothing Nothing
+playRealtime :: SoundSignal -> IO ()
+playRealtime soundSignal = do
+    s<-initPulse
     outputSound s (sanitize soundSignal)
     simpleDrain s
     simpleFree s
 
+
+
+play :: SoundSignal -> IO ()
+play signal = do
+    s<-initPulse
+    simpleWrite s $ sanitize signal 
+    simpleDrain s
+    simpleFree s
+
+-- File Output
 
 fileinfo = Info {frames = 1000, samplerate = 44100, channels = 1, seekable = False, format=Format {headerFormat =SF.HeaderFormatWav, sampleFormat = SF.SampleFormatPcm16, endianFormat = SF.EndianLittle }, sections = 1  } 
 
