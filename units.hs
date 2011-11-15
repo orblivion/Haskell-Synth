@@ -21,26 +21,33 @@ instance Range Amplitude
 
 
 data Progression domain where
-    Progression :: (Domain domain) =>  domain -> Float -> Progression domain 
+    Progression :: (Domain domain) =>  Float -> Progression domain 
 
 (+:) :: Progression domain -> Progression domain -> Progression domain
-(+:) (Progression domain a) (Progression _ b) = Progression domain (a + b)
+(+:) (Progression a) (Progression b) = Progression (a + b)
 
 
 data Conversion domain perDomain where
-    Conversion :: (Domain domain, Domain perDomain) => domain -> perDomain -> Float -> Conversion domain perDomain
+    Conversion :: (Domain domain, Domain perDomain) => Float -> Conversion domain perDomain
 
-(*:) :: Progression domain_a -> Conversion domain_a domain_b -> Progression domain_b
-(*:) (Progression domain_a a) (Conversion _ domain_b f) = Progression domain_b (a * f)
+(*:) :: Progression domain_a -> Conversion domain_b domain_a -> Progression domain_b
+(*:) (Progression a) (Conversion f) = Progression (a * f)
 
 type Second = Progression SecondDomain
+second :: Float -> Second
+second a = Progression a
+
 type Sample = Progression SampleDomain
 type Cycle  = Progression CycleDomain
 
 type Frequency = Conversion Cycle Second
+frequency :: Float -> Frequency
+frequency a = Conversion a
+
 type SamplingRate = Conversion Sample Second
 
-a = (Progression SampleDomain 5) +: (Progression SampleDomain 5)
+
+a = ( (second 5) +: (second 5) ) *: ( frequency 20 )
 
 
 
