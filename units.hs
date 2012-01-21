@@ -40,13 +40,13 @@ second a = Progression a
 type Sample = Progression SampleDomain
 type Cycle  = Progression CycleDomain
 
-type Frequency = Conversion Cycle Second
+type Frequency = Conversion CycleDomain SecondDomain
 frequency :: Float -> Frequency
 frequency a = Conversion a
 
 type SamplingRate = Conversion Sample Second
 
-
+a :: Cycle
 a = ( (second 5) +: (second 5) ) *: ( frequency 20 )
 
 
