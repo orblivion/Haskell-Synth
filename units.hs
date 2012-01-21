@@ -1,10 +1,10 @@
 class Domain d where
-    dummy1 :: d -> d
-    dummy1 x = x
+    __dummy1 :: d -> d
+    __dummy1 x = x
 
 class Range r where
-    dummy2 :: r -> r
-    dummy2 x = x
+    __dummy2 :: r -> r
+    __dummy2 x = x
 
 data SecondDomain   = SecondDomain
 instance Domain SecondDomain
