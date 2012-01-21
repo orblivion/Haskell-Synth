@@ -1,3 +1,6 @@
+class Unit u where
+    __ :: Float -> u
+
 class Domain d where
     __dummy1 :: d -> d
     __dummy1 x = x
@@ -23,6 +26,12 @@ instance Range Amplitude
 data Progression domain where
     Progression :: (Domain domain) =>  Float -> Progression domain 
 
+instance (Domain domain) => Unit (Progression domain) where
+    __ n = Progression n
+
+instance (Domain domain, Domain perDomain) => Unit (Conversion domain perDomain) where
+    __ n = Conversion n
+
 (+:) :: Progression domain -> Progression domain -> Progression domain
 (+:) (Progression a) (Progression b) = Progression (a + b)
 
@@ -47,7 +56,7 @@ frequency a = Conversion a
 type SamplingRate = Conversion Sample Second
 
 a :: Cycle
-a = ( (second 5) +: (second 5) ) *: ( frequency 20 )
+a =  second 5 +: __ 5  *: __ 20
 
 
 
