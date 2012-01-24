@@ -15,8 +15,8 @@ cabal install hsndfile
 
 ./build.sh
 ./synth.sh # run it. you should hear some sort of sound. hopefully nothing to offensive to your ears, I make no promises though! (turn down your speakers)
-
-Some revisions so far output the file, some play via pulseaudio, which is why this depends on both. You can see in the code how to do either, it's not a big difference.
+./synth.sh --realtime # same as above, except that it buffers in small chunks rather than the whole sound. It is still extremely choppy, don't bother.
+./synth.sh outputfile.wav # write to a specified file
 
 Let me know if it doesn't work and I'll add the step I forgot!
 
