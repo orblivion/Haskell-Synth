@@ -1,9 +1,5 @@
 -- Here's the overall plan:
 
--- UnitValue is the type of everything.
--- "Domain" and "Range" go away. Instead we get the Unit, which is a typeclass that signifies something as a type of unit. Defines __ :: (Unit u) UnitValue u a -> a
--- UnitValue (Unit u) => u Float/SafeValue
-
 -- Progression is a sub-typeclass of Unit, which implements (+) on those Units. We can have various functions, then, that operate on Progressions, since they'd be used as a marker of how far along a list of items.
 -- Similarly, SignalType can specify what can come out of a component. Be it a frequency, or whatnot. Or maybe we don't want to play favorites with what can go into what... hmm. Maybe for InputTypes then.
 
@@ -19,23 +15,25 @@
    
 
 -- The nature of units
-class Unit u where
-    __ :: Float -> u
+class Unit unit_type where
+    __dummy :: a -> a
 
-class Domain d where
-    __dummy1 :: d -> d
-    __dummy1 x = x
+type SafeValue = Float -- This will be a re-definition when we bring it back to the other code, so remove it then.
 
-class Range r where
-    __dummy2 :: r -> r
-    __dummy2 x = x
+type UnitValue u where
+    UnitValue :: (Unit unit_type) => SafeValue -> UnitValue unit_type
 
+__ = UnitValue
 
 
--- The nature of domains, ranges, and conversions.
+-- The nature of sorts of units
 
-data Progression domain where
-    Progression :: (Domain domain) =>  Float -> Progression domain 
+class (Unit u) => Progression (Unit u) where
+    __dummy2 :: a -> a
+
+-- Not implemented as a typeclass function because it only needs to be implemented once
+(+:) :: (Progression unit_type) => Unit unit_type -> Unit unit_type -> Unit unit_type
+(+:) (Unit a) (Unit b) = Unit (a + b)
 
 data Conversion domain perDomain where
     Conversion :: (Domain domain, Domain perDomain) => Float -> Conversion domain perDomain
