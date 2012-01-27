@@ -1,26 +1,17 @@
 -- Here's the overall plan:
 
--- Progression is a sub-typeclass of Unit, which implements (+) on those Units. We can have various functions, then, that operate on Progressions, since they'd be used as a marker of how far along a list of items.
 -- Similarly, SignalType can specify what can come out of a component. Be it a frequency, or whatnot. Or maybe we don't want to play favorites with what can go into what... hmm. Maybe for InputTypes then.
 
--- Conversion is an intermediary object, or perhaps just an intermediary type that never gets instantiated, which through some type magic (GADT specifying that it has to be of the Convertible typeclass), facilitates *: between only certain things.
--- Conversion Unit Unit Unit - unit, unitFrom, unitTo, 
-
--- (:*) Gets implemented with something like this:
--- (:*) :: (UnitValue ut1) -> (UnitValue ut2) -> (UnitValue ut3)
--- (:*) (UnitValue u1 v1) (UnitType u2 v2) = (UnitType u3 (v1 * v2)) where
---     conversion :: Conversion u1 u2 u3 -- don't do anything with this, just make an error if this is invalid
-
 -- And instead of Cycle Amplitude, it'll be something like BaseAmplitude
-   
+-- "Range", or "Value", I suppose, typeclass. For amplitude n stuff. But only maybe, just something to consider.
 
 -- The nature of units
-class Unit unit_type where
-    __dummy :: a -> a
+class Unit u where
+    __dummy :: u -> u 
 
 type SafeValue = Float -- This will be a re-definition when we bring it back to the other code, so remove it then.
 
-type UnitValue u where
+data UnitValue unit_type where
     UnitValue :: (Unit unit_type) => SafeValue -> UnitValue unit_type
 
 __ = UnitValue
@@ -28,12 +19,42 @@ __ = UnitValue
 
 -- The nature of sorts of units
 
-class (Unit u) => Progression (Unit u) where
-    __dummy2 :: a -> a
+-- Starting off with (+:), but We can have various functions over time that operate on Progressions,
+-- since they'd be used as a marker of how far along a list of items (samples, etc).
+class (Unit u) => Progression u where
+    __dummy2 :: u -> u
 
--- Not implemented as a typeclass function because it only needs to be implemented once
-(+:) :: (Progression unit_type) => Unit unit_type -> Unit unit_type -> Unit unit_type
-(+:) (Unit a) (Unit b) = Unit (a + b)
+-- Not implemented as a typeclass function because it works on Units the same way
+(+:) :: (Progression unit_type) => UnitValue unit_type -> UnitValue unit_type -> UnitValue unit_type
+(+:) (UnitValue a) (UnitValue b) = UnitValue (a + b)
+
+class (Unit top, Unit bottom, Unit result) => Conversion top bottom result where
+    (*:) :: UnitValue bottom -> UnitValue result -> UnitValue top
+    (*:) (UnitValue bottomval) (UnitValue resultval) = UnitValue (bottomval * resultval)
+    (/:) :: UnitValue top -> UnitValue bottom -> UnitValue result 
+    (/:) (UnitValue topval) (UnitValue bottomval) = UnitValue (topval / bottomval)
+
+-- Conversion between units
+--data Conversion unit unitTop unitBottom
+--    (ConversionClass (Conversion unit unitTop unitBottom)) => Conversion unit unitTop unitBottom
+
+data Frequency = Frequency
+instance Unit (UnitValue Frequency)
+
+data Cycle = Cycle
+instance Unit (UnitValue Cycle)
+
+data Second = Second
+instance Unit (UnitValue Second)
+
+instance Conversion Cycle Second Frequency
+
+x :: Frequency
+x = __ 5 * __ 5
+
+
+{-
+------------
 
 data Conversion domain perDomain where
     Conversion :: (Domain domain, Domain perDomain) => Float -> Conversion domain perDomain
@@ -121,3 +142,4 @@ a =  second 5 +: __ 5  *: __ 20
 -- Time * SamplingRate = Samples
 -- CycleSamplingRate = CycleSamples/NumCycles
 
+-}
