@@ -8,13 +8,13 @@
 -- The nature of units
 class Unit u where
     __dummy :: u -> u 
+    __ :: SafeValue -> (UnitValue u)
+    __ = UnitValue
 
 type SafeValue = Float -- This will be a re-definition when we bring it back to the other code, so remove it then.
 
 data UnitValue unit_type where
     UnitValue :: (Unit unit_type) => SafeValue -> UnitValue unit_type
-
-__ = UnitValue
 
 
 -- The nature of sorts of units
@@ -38,20 +38,26 @@ class (Unit top, Unit bottom, Unit result) => Conversion top bottom result where
 --data Conversion unit unitTop unitBottom
 --    (ConversionClass (Conversion unit unitTop unitBottom)) => Conversion unit unitTop unitBottom
 
-data Frequency = Frequency
-instance Unit (UnitValue Frequency)
-
+data Hertz = Hertz 
 data Cycle = Cycle
-instance Unit (UnitValue Cycle)
-
 data Second = Second
-instance Unit (UnitValue Second)
+second = __ :: SafeValue -> UnitValue Second
+cycle  = __ :: SafeValue -> UnitValue Cycle 
+hertz  = __ :: SafeValue -> UnitValue Hertz
 
-instance Conversion Cycle Second Frequency
+instance Unit Hertz
+instance Unit Cycle
+instance Unit Second
 
-x :: Frequency
-x = __ 5 * __ 5
+instance Progression Cycle
+instance Progression Second
 
+instance Conversion Cycle Second Hertz
+
+get_frequency :: UnitValue Second -> UnitValue Cycle -> UnitValue Hertz
+get_frequency s c = c /: s 
+
+add_5_seconds s = s +: second 5
 
 {-
 ------------
