@@ -28,6 +28,7 @@ class (Unit u) => Progression u where
 (+:) :: (Progression unit_type) => UnitValue unit_type -> UnitValue unit_type -> UnitValue unit_type
 (+:) (UnitValue a) (UnitValue b) = UnitValue (a + b)
 
+-- Rename Conversion! It's really a type relationship
 class (Unit top, Unit bottom, Unit result) => Conversion top bottom result where
     (*:) :: UnitValue bottom -> UnitValue result -> UnitValue top
     (*:) (UnitValue bottomval) (UnitValue resultval) = UnitValue (bottomval * resultval)
@@ -41,23 +42,28 @@ class (Unit top, Unit bottom, Unit result) => Conversion top bottom result where
 data Hertz = Hertz 
 data Cycle = Cycle
 data Second = Second
-second = __ :: SafeValue -> UnitValue Second
-cycle  = __ :: SafeValue -> UnitValue Cycle 
-hertz  = __ :: SafeValue -> UnitValue Hertz
+_second = __ :: SafeValue -> UnitValue Second
+_cycle  = __ :: SafeValue -> UnitValue Cycle 
+_hertz  = __ :: SafeValue -> UnitValue Hertz
 
 instance Unit Hertz
 instance Unit Cycle
 instance Unit Second
+instance Unit Generic
 
 instance Progression Cycle
 instance Progression Second
 
 instance Conversion Cycle Second Hertz
 
+-- This is a signal type. It can convert to errethang. But only explicitly!
+fromGeneric :: UnitValue Generic -> UnitValue 
+fromGeneric g val = __ 
+
 get_frequency :: UnitValue Second -> UnitValue Cycle -> UnitValue Hertz
 get_frequency s c = c /: s 
 
-add_5_seconds s = s +: second 5
+add_5_seconds s = (s :: (UnitValue Second)) +: _second 5
 
 {-
 ------------
