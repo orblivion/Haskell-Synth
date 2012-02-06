@@ -1,3 +1,10 @@
+{-# LANGUAGE
+    GADTs, 
+    MultiParamTypeClasses, 
+    FunctionalDependencies 
+    #-}
+
+
 -- Here's the overall plan:
 
 -- Similarly, SignalType can specify what can come out of a component. Be it a frequency, or whatnot. Or maybe we don't want to play favorites with what can go into what... hmm. Maybe for InputTypes then.
