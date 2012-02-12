@@ -1,7 +1,9 @@
 {-# LANGUAGE
     GADTs, 
     MultiParamTypeClasses, 
-    FunctionalDependencies 
+    FunctionalDependencies,
+    FlexibleInstances,
+    UndecidableInstances
     #-}
 
 
@@ -44,6 +46,8 @@ class (Unit top, Unit bottom, Unit result) => UnitRelationship top bottom result
     (*:) (UnitValue bottomval) (UnitValue resultval) = UnitValue (bottomval * resultval)
     (/:) :: UnitValue top -> UnitValue bottom -> UnitValue result 
     (/:) (UnitValue topval) (UnitValue bottomval) = UnitValue (topval / bottomval)
+
+instance (UnitRelationship top bottom result) => UnitRelationship top result bottom
 
 data Hertz = Hertz 
 data Cycle = Cycle
