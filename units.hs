@@ -1,9 +1,7 @@
 {-# LANGUAGE
     GADTs, 
     MultiParamTypeClasses, 
-    FunctionalDependencies,
-    FlexibleInstances,
-    UndecidableInstances
+    FunctionalDependencies
     #-}
 
 
@@ -47,7 +45,10 @@ class (Unit top, Unit bottom, Unit result) => UnitRelationship top bottom result
     (/:) :: UnitValue top -> UnitValue bottom -> UnitValue result 
     (/:) (UnitValue topval) (UnitValue bottomval) = UnitValue (topval / bottomval)
 
-instance (UnitRelationship top bottom result) => UnitRelationship top result bottom
+-- I was hoping this would work, doesn't seem to.
+-- Requires UndecidableInstances and OverlappingInstances, in case I try to pick it up again. Any ideas out there?
+-- Basically I'm trying to implement the commutative property of multiplication, and a=b/c -> c=b/a
+--instance (UnitRelationship (UnitValue top) (UnitValue bottom) (UnitValue result)) => UnitRelationship (UnitValue top) (UnitValue result) (UnitValue bottom)
 
 data Hertz = Hertz 
 data Cycle = Cycle
@@ -71,6 +72,7 @@ instance Progression Cycle
 instance Progression Second
 
 instance UnitRelationship Cycle Second Hertz
+instance UnitRelationship Cycle Hertz Second -- lame that I have to do this manually. See "hoping this would work" above.
 instance UnitRelationship Amplitude SignalValue SignalValue -- This will make sure Amplitude inputs are used correctly.
 
 -- This is a signal type. It can convert to errethang. But only explicitly!
@@ -80,6 +82,9 @@ instance UnitRelationship Amplitude SignalValue SignalValue -- This will make su
 
 get_frequency :: UnitValue Second -> UnitValue Cycle -> UnitValue Hertz
 get_frequency s c = c /: s 
+
+get_seconds :: UnitValue Hertz -> UnitValue Cycle -> UnitValue Second
+get_seconds h c = c /: h
 
 add_5_seconds s = (s :: (UnitValue Second)) +: _second 5
 
