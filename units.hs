@@ -48,21 +48,29 @@ class (Unit top, Unit bottom, Unit result) => UnitRelationship top bottom result
 data Hertz = Hertz 
 data Cycle = Cycle
 data Second = Second
-_second = __ :: SafeValue -> UnitValue Second
-_cycle  = __ :: SafeValue -> UnitValue Cycle 
-_hertz  = __ :: SafeValue -> UnitValue Hertz
+data Amplitude = Amplitude
+data SignalValue = SignalValue
+
+_second      = __ :: SafeValue -> UnitValue Second
+_cycle       = __ :: SafeValue -> UnitValue Cycle 
+_hertz       = __ :: SafeValue -> UnitValue Hertz
+_amplitude   = __ :: SafeValue -> UnitValue Amplitude
+_signalvalue = __ :: SafeValue -> UnitValue SignalValue
 
 instance Unit Hertz
-instance Unit Cycle
+instance Unit Cycle     -- Not a unit in the sense of physics. One cycle represents
 instance Unit Second
---instance Unit Generic
+instance Unit Amplitude -- Not a unit in the sense of physics
+instance Unit SignalValue -- Definitely not a unit in the sense of physics
 
 instance Progression Cycle
 instance Progression Second
 
 instance UnitRelationship Cycle Second Hertz
+instance UnitRelationship Amplitude SignalValue SignalValue -- This will make sure Amplitude inputs are used correctly.
 
 -- This is a signal type. It can convert to errethang. But only explicitly!
+-- Change this to SignalValue
 --fromGeneric :: UnitValue Generic -> UnitValue 
 --fromGeneric g val = __ 
 
