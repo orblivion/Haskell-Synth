@@ -3,6 +3,7 @@ module Components where
 import Sound.Pulse.Simple
 import Signals
 import List
+import Units
 
 import qualified Data.Vector.Generic as V
 import qualified Sound.File.Sndfile as SF
@@ -17,19 +18,11 @@ type BasicOscillator = FrequencySignal -> AmplitudeSignal -> (Maybe PWMSignal) -
 -- Raw Signal Generation Components
 --------------------------------------
 
--- TimeSamplingRate = TimeSamples/Time
--- Frequency = NumCycles/Time
--- Time * Frequency = NumCycles
--- Time * SamplingRate = Samples
--- CycleSamplingRate = CycleSamples/NumCycles
-
 data SamplingRate = SamplingRate Integer
 data Samples = Samples Integer
 data Progression = Progression Float
 data Slope = Slope Float
 
-getProgression (Samples s) (SamplingRate sr) = Progression $ ((fromIntegral s) / (fromIntegral sr))
-getNumSamples (Progression p) (SamplingRate sr) = Samples $ floor $ p * fromIntegral sr
 getSlope (Progression p) (SignalValue sv) = Slope $ (sv / p)
 signalValueFromSlope (Progression p) (Slope s) = SignalValue $ p * s
 
@@ -94,7 +87,7 @@ oscillator basicFunc fSig aSig (Just pSig) = Signal $ oscillator_ fVals aVals pV
 
             oscillatorRest = oscillator_ fRest aRest pRest (t +: cycleProgressionDelta) 
 
-            progressionDelta = getProgression (Samples 1) (SamplingRate samplesPerSecond)
+            progressionDelta = __ 1 /: __ samplesPerSecond
             cycleProgressionDelta = toCycleProgression progressionDelta (Frequency fVal)
 
 
