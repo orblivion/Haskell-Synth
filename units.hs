@@ -31,6 +31,10 @@ data UnitValue unit_type where
 class (Unit u) => Progression u where
     __dummy2 :: u -> u
 
+infixr 6 +:
+infixr 7 *:
+infixr 7 /:
+
 -- Not implemented as a typeclass function because it works on Units the same way
 (+:) :: (Progression unit_type) => UnitValue unit_type -> UnitValue unit_type -> UnitValue unit_type
 (+:) (UnitValue a) (UnitValue b) = UnitValue (a + b)
@@ -51,7 +55,7 @@ _hertz  = __ :: SafeValue -> UnitValue Hertz
 instance Unit Hertz
 instance Unit Cycle
 instance Unit Second
-instance Unit Generic
+--instance Unit Generic
 
 instance Progression Cycle
 instance Progression Second
@@ -59,8 +63,8 @@ instance Progression Second
 instance UnitRelationship Cycle Second Hertz
 
 -- This is a signal type. It can convert to errethang. But only explicitly!
-fromGeneric :: UnitValue Generic -> UnitValue 
-fromGeneric g val = __ 
+--fromGeneric :: UnitValue Generic -> UnitValue 
+--fromGeneric g val = __ 
 
 get_frequency :: UnitValue Second -> UnitValue Cycle -> UnitValue Hertz
 get_frequency s c = c /: s 
