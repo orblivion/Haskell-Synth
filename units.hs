@@ -8,7 +8,7 @@
 module Units where
 
 -- The nature of units
-class Unit unit_type num_type | unit_type -> num_type where
+class (Num num_type) => Unit unit_type num_type | unit_type -> num_type where
     __dummy :: unit_type -> unit_type 
     __ :: num_type -> (UnitValue unit_type num_type)
     __ = UnitValue
@@ -28,7 +28,7 @@ instance UnitNum Integer where
     fromSafeValue num = floor num
 
 data UnitValue unit_type num_type where
-    UnitValue :: (Unit unit_type num_type) => num_type -> UnitValue unit_type num_type
+    UnitValue :: (Unit unit_type num_type, Num num_type) => num_type -> UnitValue unit_type num_type
 
 
 -- The nature of sorts of units
@@ -50,8 +50,10 @@ class (Unit u num_type) => Progression u num_type where
 -- Next with how units interoperate.
 class (UnitNum t_num, UnitNum b_num, UnitNum r_num, Unit top t_num, Unit bottom b_num, Unit result r_num)
     => UnitRelationship top bottom result t_num b_num r_num | top bottom -> result, top -> t_num, bottom -> b_num, result -> r_num where
+
     (*:) :: UnitValue bottom b_num -> UnitValue result r_num -> UnitValue top t_num
     (*:) (UnitValue bottomval) (UnitValue resultval) = UnitValue (bottomval * resultval)
+
     (/:) :: UnitValue top t_num -> UnitValue bottom b_num -> UnitValue result r_num
     (/:) (UnitValue topval) (UnitValue bottomval) = UnitValue (topval / bottomval)
 
@@ -82,11 +84,12 @@ data SamplePerSecond = SamplePerSecond
 
 -- Some shortcuts, since the type of __ aka UnitValue is ambiguous, and Hertz etc are only a parameter.
 -- Would be nice if these were automatically made
-_second      = __ :: SafeValue -> UnitValue Second
-_cycle       = __ :: SafeValue -> UnitValue Cycle 
-_hertz       = __ :: SafeValue -> UnitValue Hertz
-_amplitude   = __ :: SafeValue -> UnitValue Amplitude
-_signalvalue = __ :: SafeValue -> UnitValue SignalValue
+_second      = __ :: SafeValue -> UnitValue Second SafeValue
+_sample      = __ :: Integer   -> UnitValue Sample Integer
+_cycle       = __ :: SafeValue -> UnitValue Cycle SafeValue
+_hertz       = __ :: SafeValue -> UnitValue Hertz SafeValue
+_amplitude   = __ :: SafeValue -> UnitValue Amplitude SafeValue
+_signalvalue = __ :: SafeValue -> UnitValue SignalValue SafeValue
 
 instance Unit Hertz SafeValue
 instance Unit SamplePerSecond Integer
