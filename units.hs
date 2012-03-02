@@ -48,14 +48,10 @@ class (Unit u num_type) => Progression u num_type where
 (+:) (UnitValue a) (UnitValue b) = UnitValue (a + b)
 
 -- Next with how units interoperate.
-class (UnitNum t_num, UnitNum b_num, UnitNum r_num, Unit top t_num, Unit bottom b_num, Unit result r_num)
+class (UnitNum t_num, UnitNum b_num, UnitNum r_num, Unit top t_num, Unit bottom b_num, Unit result r_num, Fractional r_num)
     => UnitRelationship top bottom result t_num b_num r_num | top bottom -> result, top -> t_num, bottom -> b_num, result -> r_num where
-
     (*:) :: UnitValue bottom b_num -> UnitValue result r_num -> UnitValue top t_num
-    (*:) (UnitValue bottomval) (UnitValue resultval) = UnitValue (bottomval * resultval)
-
     (/:) :: UnitValue top t_num -> UnitValue bottom b_num -> UnitValue result r_num
-    (/:) (UnitValue topval) (UnitValue bottomval) = UnitValue (topval / bottomval)
 
 
 -- I was hoping the following would work, doesn't seem to:
@@ -110,11 +106,19 @@ instance Progression Sample Integer
 
 
 instance UnitRelationship Cycle Second Hertz SafeValue SafeValue SafeValue
+    (/:) (UnitValue a) (UnitValue b) = UnitValue (a/b)
+    (*:) (UnitValue a) (UnitValue b) = UnitValue (a*b)
  -- lame that I have to do the commutative manually. See "hoping this would work" above.
 instance UnitRelationship Cycle Hertz Second SafeValue SafeValue SafeValue
+    (/:) (UnitValue a) (UnitValue b) = UnitValue (a/b)
+    (*:) (UnitValue a) (UnitValue b) = UnitValue (a*b)
 
 instance UnitRelationship Sample Second SamplePerSecond Integer SafeValue Integer 
+    (/:) (UnitValue a) (UnitValue b) = UnitValue (a/b)
+    (*:) (UnitValue a) (UnitValue b) = UnitValue (a*b)
 instance UnitRelationship Sample SamplePerSecond Second Integer Integer SafeValue 
+    (/:) (UnitValue a) (UnitValue b) = UnitValue (a/b)
+    (*:) (UnitValue a) (UnitValue b) = UnitValue (a*b)
 
 instance UnitRelationship SignalValue Sample SignalSlope SafeValue Integer SafeValue
 instance UnitRelationship SignalValue SignalSlope Sample SafeValue SafeValue Integer
