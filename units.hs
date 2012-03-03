@@ -2,14 +2,18 @@
     GADTs, 
     MultiParamTypeClasses, 
     TypeSynonymInstances, 
-    FunctionalDependencies
+    FunctionalDependencies,
+    FlexibleInstances,
+    FlexibleContexts,
+    UndecidableInstances
     #-}
+
+
 
 module Units where
 
 -- The nature of units
 class (Num num_type) => Unit unit_type num_type | unit_type -> num_type where
-    __dummy :: unit_type -> unit_type 
     __ :: num_type -> (UnitValue unit_type num_type)
     __ = UnitValue
 
@@ -41,7 +45,7 @@ infixr 7 /:
 -- Starting off with Progressions, with (+:), but we can have various functions over time that operate on Progressions,
 -- since they'd be used as a marker of how far along a list of items (samples, etc).
 class (Unit u num_type) => Progression u num_type where
-    __dummy2 :: u -> u
+    __dummy :: u -> u
 
 -- Not implemented as a typeclass function because it works on Units the same way
 (+:) :: (Progression unit_type num_type) => UnitValue unit_type num_type-> UnitValue unit_type num_type -> UnitValue unit_type num_type
@@ -53,11 +57,35 @@ class (UnitNum t_num, UnitNum b_num, UnitNum r_num, Unit top t_num, Unit bottom 
     (*:) :: UnitValue bottom b_num -> UnitValue result r_num -> UnitValue top t_num
     (/:) :: UnitValue top t_num -> UnitValue bottom b_num -> UnitValue result r_num
 
+class (UnitRelationship top bottom result t_num b_num r_num)
+    => DefaultUnitRelationship top bottom result t_num b_num r_num where
+    __dummy2 :: top -> top
 
--- I was hoping the following would work, doesn't seem to:
--- Requires UndecidableInstances and OverlappingInstances, in case I try to pick it up again. Any ideas out there?
--- Basically I'm trying to implement the commutative property of multiplication, and a=b/c -> c=b/a
---instance (UnitRelationship (UnitValue top) (UnitValue bottom) (UnitValue result)) => UnitRelationship (UnitValue top) (UnitValue result) (UnitValue bottom)
+instance (DefaultUnitRelationship top bottom result SafeValue SafeValue SafeValue)
+    => UnitRelationship top bottom result SafeValue SafeValue SafeValue where
+    (/:) (UnitValue a) (UnitValue b) = UnitValue (a/b)
+    (*:) (UnitValue a) (UnitValue b) = UnitValue (a*b)
+
+instance (DefaultUnitRelationship top bottom result SafeValue SafeValue Integer )
+    => UnitRelationship top bottom result SafeValue SafeValue Integer where
+    (/:) (UnitValue a) (UnitValue b) = floor $ UnitValue (a/b)
+    (*:) (UnitValue a) (UnitValue b) = UnitValue (a*(fromIntegral b))
+   
+instance (DefaultUnitRelationship top bottom result SafeValue Integer SafeValue )
+    => UnitRelationship top bottom result SafeValue Integer SafeValue where
+    (/:) (UnitValue a) (UnitValue b) = UnitValue (a/(fromIntegral b))
+    (*:) (UnitValue a) (UnitValue b) = UnitValue ((fromIntegral a)*b)
+
+instance (DefaultUnitRelationship top bottom result Integer Integer SafeValue )
+    => UnitRelationship top bottom result Integer Integer SafeValue where
+    (/:) (UnitValue a) (UnitValue b) = UnitValue ((fromIntegral a)/(fromIntegral b))
+    (*:) (UnitValue a) (UnitValue b) = UnitValue floor ((fromIntegral a)*b)
+
+instance (DefaultUnitRelationship top bottom result Integer SafeValue Integer )
+    => UnitRelationship top bottom result Integer SafeValue Integer where
+    (/:) (UnitValue a) (UnitValue b) = UnitValue ((fromIntegral a)/(fromIntegral b))
+    (*:) (UnitValue a) (UnitValue b) = UnitValue floor (a*(fromIntegral b))
+
 
 -- Actual unit types and their interactions:
 
@@ -105,26 +133,19 @@ instance Progression Second SafeValue
 instance Progression Sample Integer
 
 
-instance UnitRelationship Cycle Second Hertz SafeValue SafeValue SafeValue
-    (/:) (UnitValue a) (UnitValue b) = UnitValue (a/b)
-    (*:) (UnitValue a) (UnitValue b) = UnitValue (a*b)
- -- lame that I have to do the commutative manually. See "hoping this would work" above.
-instance UnitRelationship Cycle Hertz Second SafeValue SafeValue SafeValue
-    (/:) (UnitValue a) (UnitValue b) = UnitValue (a/b)
-    (*:) (UnitValue a) (UnitValue b) = UnitValue (a*b)
+instance DefaultUnitRelationship Cycle Second Hertz SafeValue SafeValue SafeValue
+ -- lame that I have to do the commutative manually. I don't want it
+ -- automatically implied anyway though
+instance DefaultUnitRelationship Cycle Hertz Second SafeValue SafeValue SafeValue
 
-instance UnitRelationship Sample Second SamplePerSecond Integer SafeValue Integer 
-    (/:) (UnitValue a) (UnitValue b) = UnitValue (a/b)
-    (*:) (UnitValue a) (UnitValue b) = UnitValue (a*b)
-instance UnitRelationship Sample SamplePerSecond Second Integer Integer SafeValue 
-    (/:) (UnitValue a) (UnitValue b) = UnitValue (a/b)
-    (*:) (UnitValue a) (UnitValue b) = UnitValue (a*b)
+instance DefaultUnitRelationship Sample Second SamplePerSecond Integer SafeValue Integer
+instance DefaultUnitRelationship Sample SamplePerSecond Second Integer Integer SafeValue
 
-instance UnitRelationship SignalValue Sample SignalSlope SafeValue Integer SafeValue
-instance UnitRelationship SignalValue SignalSlope Sample SafeValue SafeValue Integer
+instance DefaultUnitRelationship SignalValue Sample SignalSlope SafeValue Integer SafeValue
+instance DefaultUnitRelationship SignalValue SignalSlope Sample SafeValue SafeValue Integer
 
 -- This will make sure Amplitude inputs are used correctly.
-instance UnitRelationship Amplitude SignalValue SignalValue SafeValue SafeValue SafeValue
+instance DefaultUnitRelationship Amplitude SignalValue SignalValue SafeValue SafeValue SafeValue
 
 get_frequency :: UnitValue Second SafeValue -> UnitValue Cycle SafeValue -> UnitValue Hertz SafeValue
 get_frequency s c = c /: s 
