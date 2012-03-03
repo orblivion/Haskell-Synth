@@ -57,8 +57,7 @@ class (UnitNum t_num, UnitNum b_num, UnitNum r_num, Unit top t_num, Unit bottom 
     (*:) :: UnitValue bottom b_num -> UnitValue result r_num -> UnitValue top t_num
     (/:) :: UnitValue top t_num -> UnitValue bottom b_num -> UnitValue result r_num
 
-class (UnitRelationship top bottom result t_num b_num r_num)
-    => DefaultUnitRelationship top bottom result t_num b_num r_num where
+class DefaultUnitRelationship top bottom result t_num b_num r_num where
     __dummy2 :: top -> top
 
 instance (DefaultUnitRelationship top bottom result SafeValue SafeValue SafeValue)
