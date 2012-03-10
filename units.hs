@@ -40,7 +40,7 @@ class (Unit u num_type) => Progression u num_type where
 (+:) (UnitValue a) (UnitValue b) = UnitValue (a + b)
 
 -- Next with how units interoperate.
-class (Num t_num, Num b_num, Num r_num, Unit top t_num, Unit bottom b_num, Unit result r_num, Fractional r_num, UnitRelationshipDefault t_num b_num r_num)
+class (Num t_num, Num b_num, Num r_num, Unit top t_num, Unit bottom b_num, Unit result r_num, UnitRelationshipDefault t_num b_num r_num)
     => UnitRelationship top bottom result t_num b_num r_num | top bottom -> result, top -> t_num, bottom -> b_num, result -> r_num where
     (*:) :: UnitValue bottom b_num -> UnitValue result r_num -> UnitValue top t_num
     (*:) (UnitValue a) (UnitValue b) = UnitValue $ default_mult a b
@@ -68,8 +68,8 @@ instance UnitRelationshipDefault Integer Integer SafeValue where
     default_div  t b = (fromIntegral t) / (fromIntegral b)
 
 instance UnitRelationshipDefault Integer SafeValue Integer where
-    default_mult b r = floor $ b * (fromIntegral r)
-    default_div  t b = floor $ (fromIntegral t) /  b
+    default_mult b r = 5 -- floor $ b * (fromIntegral r)
+    default_div  t b = 5 -- floor $ (fromIntegral t) /  b
 
 
 -- Actual unit types and their interactions:
@@ -119,8 +119,9 @@ instance Progression Sample Integer
 
 
 instance UnitRelationship Cycle Second Hertz SafeValue SafeValue SafeValue
- -- lame that I have to do the commutative manually. I don't want it
- -- automatically implied anyway though
+ -- sortof lame that I have to do the commutative manually, but I actually don't want it
+ -- automatically implied anyway. for instance, I see no reason (yet) to end up with
+ -- a sampling rate as a result, that should actually be constant
 instance UnitRelationship Cycle Hertz Second SafeValue SafeValue SafeValue
 
 instance UnitRelationship Sample Second SamplePerSecond Integer SafeValue Integer
