@@ -19,18 +19,6 @@ class (Num num_type) => Unit unit_type num_type | unit_type -> num_type where
 
 type SafeValue = Float -- This will be a re-definition when we bring it back to the other code, so remove it then.
 
-class (Num num_type) => UnitNum num_type where
-    toSafeValue :: num_type -> SafeValue
-    fromSafeValue :: SafeValue -> num_type
-
-instance UnitNum SafeValue where
-    toSafeValue num = num
-    fromSafeValue num = num
-
-instance UnitNum Integer where
-    toSafeValue num = fromIntegral num
-    fromSafeValue num = floor num
-
 data UnitValue unit_type num_type where
     UnitValue :: (Unit unit_type num_type, Num num_type) => num_type -> UnitValue unit_type num_type
 
@@ -52,38 +40,36 @@ class (Unit u num_type) => Progression u num_type where
 (+:) (UnitValue a) (UnitValue b) = UnitValue (a + b)
 
 -- Next with how units interoperate.
-class (UnitNum t_num, UnitNum b_num, UnitNum r_num, Unit top t_num, Unit bottom b_num, Unit result r_num, Fractional r_num)
+class (Num t_num, Num b_num, Num r_num, Unit top t_num, Unit bottom b_num, Unit result r_num, Fractional r_num, UnitRelationshipDefault t_num b_num r_num)
     => UnitRelationship top bottom result t_num b_num r_num | top bottom -> result, top -> t_num, bottom -> b_num, result -> r_num where
     (*:) :: UnitValue bottom b_num -> UnitValue result r_num -> UnitValue top t_num
+    (*:) (UnitValue a) (UnitValue b) = UnitValue $ default_mult a b
     (/:) :: UnitValue top t_num -> UnitValue bottom b_num -> UnitValue result r_num
+    (/:) (UnitValue a) (UnitValue b) = UnitValue $ default_div a b
 
-class DefaultUnitRelationship top bottom result t_num b_num r_num where
-    __dummy2 :: top -> top
+class (Num t_num, Num b_num, Num r_num) => UnitRelationshipDefault t_num b_num r_num where
+    default_mult :: b_num -> r_num -> t_num
+    default_div  :: t_num -> b_num -> r_num
 
-instance (DefaultUnitRelationship top bottom result SafeValue SafeValue SafeValue)
-    => UnitRelationship top bottom result SafeValue SafeValue SafeValue where
-    (/:) (UnitValue a) (UnitValue b) = UnitValue (a/b)
-    (*:) (UnitValue a) (UnitValue b) = UnitValue (a*b)
+instance UnitRelationshipDefault SafeValue SafeValue SafeValue where
+    default_mult b r = b * r
+    default_div  t b = t / b
 
-instance (DefaultUnitRelationship top bottom result SafeValue SafeValue Integer )
-    => UnitRelationship top bottom result SafeValue SafeValue Integer where
-    (/:) (UnitValue a) (UnitValue b) = floor $ UnitValue (a/b)
-    (*:) (UnitValue a) (UnitValue b) = UnitValue (a*(fromIntegral b))
-   
-instance (DefaultUnitRelationship top bottom result SafeValue Integer SafeValue )
-    => UnitRelationship top bottom result SafeValue Integer SafeValue where
-    (/:) (UnitValue a) (UnitValue b) = UnitValue (a/(fromIntegral b))
-    (*:) (UnitValue a) (UnitValue b) = UnitValue ((fromIntegral a)*b)
+instance UnitRelationshipDefault SafeValue SafeValue Integer where
+    default_mult b r = b * (fromIntegral r)
+    default_div  t b = floor $ t / b
 
-instance (DefaultUnitRelationship top bottom result Integer Integer SafeValue )
-    => UnitRelationship top bottom result Integer Integer SafeValue where
-    (/:) (UnitValue a) (UnitValue b) = UnitValue ((fromIntegral a)/(fromIntegral b))
-    (*:) (UnitValue a) (UnitValue b) = UnitValue floor ((fromIntegral a)*b)
+instance UnitRelationshipDefault SafeValue Integer SafeValue where
+    default_mult b r = (fromIntegral b) * r
+    default_div  t b = t / (fromIntegral b)
 
-instance (DefaultUnitRelationship top bottom result Integer SafeValue Integer )
-    => UnitRelationship top bottom result Integer SafeValue Integer where
-    (/:) (UnitValue a) (UnitValue b) = UnitValue ((fromIntegral a)/(fromIntegral b))
-    (*:) (UnitValue a) (UnitValue b) = UnitValue floor (a*(fromIntegral b))
+instance UnitRelationshipDefault Integer Integer SafeValue where
+    default_mult b r = floor $ (fromIntegral b) * r
+    default_div  t b = (fromIntegral t) / (fromIntegral b)
+
+instance UnitRelationshipDefault Integer SafeValue Integer where
+    default_mult b r = floor $ b * (fromIntegral r)
+    default_div  t b = floor $ (fromIntegral t) /  b
 
 
 -- Actual unit types and their interactions:
@@ -132,19 +118,19 @@ instance Progression Second SafeValue
 instance Progression Sample Integer
 
 
-instance DefaultUnitRelationship Cycle Second Hertz SafeValue SafeValue SafeValue
+instance UnitRelationship Cycle Second Hertz SafeValue SafeValue SafeValue
  -- lame that I have to do the commutative manually. I don't want it
  -- automatically implied anyway though
-instance DefaultUnitRelationship Cycle Hertz Second SafeValue SafeValue SafeValue
+instance UnitRelationship Cycle Hertz Second SafeValue SafeValue SafeValue
 
-instance DefaultUnitRelationship Sample Second SamplePerSecond Integer SafeValue Integer
-instance DefaultUnitRelationship Sample SamplePerSecond Second Integer Integer SafeValue
+instance UnitRelationship Sample Second SamplePerSecond Integer SafeValue Integer
+instance UnitRelationship Sample SamplePerSecond Second Integer Integer SafeValue
 
-instance DefaultUnitRelationship SignalValue Sample SignalSlope SafeValue Integer SafeValue
-instance DefaultUnitRelationship SignalValue SignalSlope Sample SafeValue SafeValue Integer
+instance UnitRelationship SignalValue Sample SignalSlope SafeValue Integer SafeValue
+instance UnitRelationship SignalValue SignalSlope Sample SafeValue SafeValue Integer
 
 -- This will make sure Amplitude inputs are used correctly.
-instance DefaultUnitRelationship Amplitude SignalValue SignalValue SafeValue SafeValue SafeValue
+instance UnitRelationship Amplitude SignalValue SignalValue SafeValue SafeValue SafeValue
 
 get_frequency :: UnitValue Second SafeValue -> UnitValue Cycle SafeValue -> UnitValue Hertz SafeValue
 get_frequency s c = c /: s 
