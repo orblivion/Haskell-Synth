@@ -68,8 +68,8 @@ instance UnitRelationshipDefault Integer Integer SafeValue where
     default_div  t b = (fromIntegral t) / (fromIntegral b)
 
 instance UnitRelationshipDefault Integer SafeValue Integer where
-    default_mult b r = 5 -- floor $ b * (fromIntegral r)
-    default_div  t b = 5 -- floor $ (fromIntegral t) /  b
+    default_mult b r = floor $ b * (fromIntegral r)
+    default_div  t b = floor $ (fromIntegral t) /  b
 
 
 -- Actual unit types and their interactions:
