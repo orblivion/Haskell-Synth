@@ -1,5 +1,6 @@
 import Components
 import Signals 
+import System( getArgs )
 
 lfo_env = slideEnvelope [(5, 1), (30, 2), (10, 20), (10, 20)]
 amp_lfo = osc_sine (specialize $ flatSignal 2 ) (specialize $ flatSignal 0.5) Nothing
@@ -55,9 +56,19 @@ bass_instr sequence = catSignals $ map bass sequence where
 
 kick_sequence = kick_instr $ (Progression 0):( cycle [ Progression 0.2, Progression 0.4, Progression 0.2, Progression 0.4, Progression 0.2, Progression 0.1, Progression 0.1])
 chime_sequence = chime_instr $ [Progression 1 ] ++ repeat ( Progression 1.6 )
-bass_sequence = bass_instr $ cycle [ (41.2, Progression 0.6), (41.2, Progression 0.6),  (43.65, Progression 0.4) ]
+bass_sequence = bass_instr $ cycle [ (41.2, Progression 0.2), (41.2, Progression 0.6),  (43.65, Progression 0.4),  (38.8, Progression 0.4) ]
 
-the_sound = specialize $ takeSeconds 6 $ sig_adder $ [chime_sequence, kick_sequence, bass_sequence]
+the_sound = specialize $ takeSeconds 6 $ sig_adder $ [bass_sequence, chime_sequence, kick_sequence]
 
-main = writeSound the_sound "out.wav"
--- main = play the_sound
+-- main = 
+-- main = playRealtime the_sound
+-- play the_sound
+
+handleSound [] = play the_sound
+handleSound ["--realtime"] = playRealtime the_sound
+handleSound [filename] = writeSound the_sound filename 
+handleSound _ = return ()
+
+main = do
+    args <- getArgs
+    handleSound args

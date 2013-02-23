@@ -3,10 +3,12 @@ module Components where
 import Sound.Pulse.Simple
 import Signals
 import List
+import Units
 
 import qualified Data.Vector.Generic as V
 import qualified Sound.File.Sndfile as SF
 import qualified Sound.File.Sndfile.Buffer.Vector as BV
+import qualified Control.Concurrent as CC
 
 import Sound.File.Sndfile
 
@@ -16,19 +18,11 @@ type BasicOscillator = FrequencySignal -> AmplitudeSignal -> (Maybe PWMSignal) -
 -- Raw Signal Generation Components
 --------------------------------------
 
--- TimeSamplingRate = TimeSamples/Time
--- Frequency = NumCycles/Time
--- Time * Frequency = NumCycles
--- Time * SamplingRate = Samples
--- CycleSamplingRate = CycleSamples/NumCycles
-
 data SamplingRate = SamplingRate Integer
 data Samples = Samples Integer
 data Progression = Progression Float
 data Slope = Slope Float
 
-getProgression (Samples s) (SamplingRate sr) = Progression $ ((fromIntegral s) / (fromIntegral sr))
-getNumSamples (Progression p) (SamplingRate sr) = Samples $ floor $ p * fromIntegral sr
 getSlope (Progression p) (SignalValue sv) = Slope $ (sv / p)
 signalValueFromSlope (Progression p) (Slope s) = SignalValue $ p * s
 
@@ -93,7 +87,7 @@ oscillator basicFunc fSig aSig (Just pSig) = Signal $ oscillator_ fVals aVals pV
 
             oscillatorRest = oscillator_ fRest aRest pRest (t +: cycleProgressionDelta) 
 
-            progressionDelta = getProgression (Samples 1) (SamplingRate samplesPerSecond)
+            progressionDelta = __ 1 /: __ samplesPerSecond
             cycleProgressionDelta = toCycleProgression progressionDelta (Frequency fVal)
 
 
@@ -184,15 +178,37 @@ stepEnvelope = envelope func where
 -- Sound Output Components
 --------------------------------------
 
+-- Mixer Output
+
+buffersize = 1000
+
+initPulse = simpleNew Nothing "example" Play Nothing "this is an example application" (SampleSpec (F32 LittleEndian) 44100 1) Nothing Nothing
+
+outputSound s [] = do
+    return ()
+outputSound s signal = do
+    let !buffer = take buffersize signal
+    let rest = drop buffersize signal
+    CC.forkIO ( simpleWrite s buffer ) >> do 
+        outputSound s rest
+
+playRealtime :: SoundSignal -> IO ()
+playRealtime soundSignal = do
+    s<-initPulse
+    outputSound s (sanitize soundSignal)
+    simpleDrain s
+    simpleFree s
+
+
 
 play :: SoundSignal -> IO ()
 play signal = do
-    s<-simpleNew Nothing "example" Play Nothing "this is an example application"
-        (SampleSpec (F32 LittleEndian) 44100 1) Nothing Nothing
+    s<-initPulse
     simpleWrite s $ sanitize signal 
     simpleDrain s
     simpleFree s
 
+-- File Output
 
 fileinfo = Info {frames = 1000, samplerate = 44100, channels = 1, seekable = False, format=Format {headerFormat =SF.HeaderFormatWav, sampleFormat = SF.SampleFormatPcm16, endianFormat = SF.EndianLittle }, sections = 1  } 
 

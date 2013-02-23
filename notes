@@ -20,7 +20,8 @@ Then make all components and functions that end, safe like that.
 define clearEmptySignals
 
 envelopes.
-filters
+    have one kind of envelope. have slideTo, jumpTo, End, Stay
+filters (see below)
     fft
 ring mod
 
@@ -30,3 +31,15 @@ Instruments. Control signals.
  different control signal types. one where i specify a specific time. ones where I specify in how this one starts. one where I specify how long this one will last.
 
 yaml/json parser. have every object represent the function's output. for something like amplitude you can pass another structure to get its signal, or a number to do flatsignal.
+
+
+Other Similar projects I should look at:
+Yampasynth
+Filters:
+(quote)
+a synth style filter increases the level of the harmonics around the cutoff
+http://www.soundonsound.com/sos/oct99/images/synth13_14.gif
+Q = resonance
+otherwise without resonance its more of what an EQ would
+do
+from this page http://www.soundonsound.com/sos/oct99/articles/synthsecrets.htm
