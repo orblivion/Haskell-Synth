@@ -37,12 +37,12 @@ kick_instr sequence = sig_sequence $ map toSigSequence sequence where
     toSigSequence progression = ([kick], progression)
     kick = osc_triangle (specialize f_env) (specialize a_env) Nothing where
     f_env = slideEnvelope [(100, 0.1), (20, 100), (20, 100)]
-    a_env = slideEnvelope [(0, 0.001), (0.4,0.1), (0,0.5), (0,100), (0, 100)]
+    a_env = slideEnvelope [(0, 0.001), (0.35,0.1), (0,0.5), (0,100), (0, 100)]
 
 
 chime_instr sequence = sig_sequence $ map toSigSequence sequence where
-    toSigSequence progression = ([chime], progression)
-    chime = osc_triangle (specialize $ flatSignal 5000) (specialize $ sig_adder [a_env, a_lfo]) (Just (specialize $ flatSignal 0.95))
+    toSigSequence (amplitude, progression) = ([chime amplitude], progression)
+    chime amplitude = osc_triangle (specialize $ flatSignal amplitude) (specialize $ sig_adder [a_env, a_lfo]) (Just (specialize $ flatSignal 0.95))
     a_env = slideEnvelope [(0, 0.001), (0.1,0.5), (0.05,2), (0,100), (0, 100)]
     a_lfo = osc_sine (specialize $ flatSignal 3) (specialize a_env) Nothing where
         a_env = slideEnvelope [(0.05, 2.5), (0, 100), (0, 100)]
@@ -51,14 +51,20 @@ bass_instr sequence = catSignals $ map bass sequence where
     bass (pitch, Progression p) = takeSeconds p $ osc_triangle (specialize $ sig_adder [freq pitch]) (amp p) (Just $ specialize $ flatSignal 0.8)
     freq pitch = flatSignal pitch
     freq_lfo = osc_triangle (specialize $ flatSignal 15) (specialize $ flatSignal 5) Nothing
-    amp p = specialize $ slideEnvelope [ (0, 0.001), (0.4, p - 0.2), (0.4,0.2), (0,100), (0,100) ]
+    amp p = specialize $ slideEnvelope [ (0, 0.001), (0.45, p - 0.2), (0.4,0.2), (0,100), (0,100) ]
 
+whomp_instr sequence = catSignals $ map bass sequence where
+    bass (pitch, Progression p) = takeSeconds p $ osc_sawtooth (specialize $ sig_adder [freq pitch]) (amp p) (Just $ specialize $ flatSignal 0.8)
+    freq pitch = flatSignal pitch
+    freq_lfo = osc_triangle (specialize $ flatSignal 15) (specialize $ flatSignal 5) Nothing
+    amp p = specialize $ slideEnvelope [ (0, p / 4), (0.3, p / 4), (0, p / 4), (0,100), (0,100) ]
 
 kick_sequence = kick_instr $ (Progression 0):( cycle [ Progression 0.2, Progression 0.4, Progression 0.2, Progression 0.4, Progression 0.2, Progression 0.1, Progression 0.1])
-chime_sequence = chime_instr $ [Progression 1 ] ++ repeat ( Progression 1.6 )
-bass_sequence = bass_instr $ cycle [ (41.2, Progression 0.2), (41.2, Progression 0.6),  (43.65, Progression 0.4),  (38.8, Progression 0.4) ]
+chime_sequence = chime_instr $ [(0, Progression 0.2) ] ++ cycle [(0, Progression 4.8), (5000, Progression 1.6)]
+bass_sequence = bass_instr $ cycle [ (0, Progression 0.2), (41.2, Progression 0.2), (41.2, Progression 0.4)]
+whomp_sequence = whomp_instr $ [(0, Progression 0.3)] ++ cycle [ (40, Progression 1.6) ]
 
-the_sound = specialize $ takeSeconds 6 $ sig_adder $ [bass_sequence, chime_sequence, kick_sequence]
+the_sound = specialize $ takeSeconds 20 $ sig_adder $ [chime_sequence, bass_sequence, whomp_sequence, kick_sequence]
 
 -- main = 
 -- main = playRealtime the_sound
