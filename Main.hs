@@ -41,11 +41,11 @@ kick_instr sequence = sig_sequence $ map toSigSequence sequence where
 
 
 chime_instr sequence = sig_sequence $ map toSigSequence sequence where
-    toSigSequence (amplitude, progression) = ([chime amplitude], progression)
-    chime amplitude = osc_triangle (specialize $ flatSignal amplitude) (specialize $ sig_adder [a_env, a_lfo]) (Just (specialize $ flatSignal 0.95))
-    a_env = slideEnvelope [(0, 0.001), (0.1,0.5), (0.05,2), (0,100), (0, 100)]
+    toSigSequence (frequency, progression) = ([chime frequency], progression)
+    chime frequency = osc_triangle (specialize $ flatSignal frequency) (specialize $ sig_adder [a_env, a_lfo]) (Just (specialize $ flatSignal 0.95))
+    a_env = slideEnvelope [(0, 0.001), (0.05,0.5), (0.025,2), (0,100), (0, 100)]
     a_lfo = osc_sine (specialize $ flatSignal 3) (specialize a_env) Nothing where
-        a_env = slideEnvelope [(0.05, 2.5), (0, 100), (0, 100)]
+        a_env = slideEnvelope [(0.025, 2.5), (0, 100), (0, 100)]
 
 bass_instr sequence = catSignals $ map bass sequence where
     bass (pitch, Progression p) = takeSeconds p $ osc_triangle (specialize $ sig_adder [freq pitch]) (amp p) (Just $ specialize $ flatSignal 0.8)
