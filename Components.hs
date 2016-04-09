@@ -2,8 +2,7 @@ module Components where
 
 import Sound.Pulse.Simple
 import Signals
-import List
-import Units
+import Data.List
 
 import qualified Data.Vector.Generic as V
 import qualified Sound.File.Sndfile as SF
@@ -32,6 +31,8 @@ data Amplitude = Amplitude SafeValue
 
 cycleFunc func (Cycle val_a ) (Cycle val_b )  = Cycle $ func val_a val_b 
 
+getProgression (Samples s) (SamplingRate sr) = Progression $ ((fromIntegral s) / (fromIntegral sr))
+getNumSamples (Progression p) (SamplingRate sr) = Samples $ floor $ p * fromIntegral sr
 fromCycleProgression (Cycle (Progression cp)) (Frequency f) = Progression (cp / f)
 toCycleProgression   (Progression tp) (Frequency f) = Cycle $ Progression (tp * f)
 
@@ -87,7 +88,10 @@ oscillator basicFunc fSig aSig (Just pSig) = Signal $ oscillator_ fVals aVals pV
 
             oscillatorRest = oscillator_ fRest aRest pRest (t +: cycleProgressionDelta) 
 
-            progressionDelta = __ 1 /: __ samplesPerSecond
+            progressionDelta = getProgression (Samples 1) (SamplingRate samplesPerSecond)
+            -- Part of starting to incorporate the dubious Units.hs
+            -- Undoing this for now, maybe forever.
+            -- progressionDelta = __ 1 /: __ samplesPerSecond
             cycleProgressionDelta = toCycleProgression progressionDelta (Frequency fVal)
 
 
@@ -187,7 +191,7 @@ initPulse = simpleNew Nothing "example" Play Nothing "this is an example applica
 outputSound s [] = do
     return ()
 outputSound s signal = do
-    let !buffer = take buffersize signal
+    let buffer = take buffersize signal
     let rest = drop buffersize signal
     CC.forkIO ( simpleWrite s buffer ) >> do 
         outputSound s rest

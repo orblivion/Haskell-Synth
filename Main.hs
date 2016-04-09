@@ -1,6 +1,6 @@
 import Components
 import Signals 
-import System( getArgs )
+import System.Environment( getArgs )
 
 lfo_env = slideEnvelope [(5, 1), (30, 2), (10, 20), (10, 20)]
 amp_lfo = osc_sine (specialize $ flatSignal 2 ) (specialize $ flatSignal 0.5) Nothing

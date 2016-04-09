@@ -1,27 +1,39 @@
-This is a synth in Haskell. I'm just getting started at this point. I'm also just learning Haskell.
+This is a synth in Haskell. It's still rather limited in feature, at this point
+it's just a fun project.
 
-To get it working on Ubuntu Lucid:
+To get it working on Ubuntu Wily:
 
-sudo apt-get install ghc6 # this is Haskell. It may take a while
-sudo apt-get install cabal-install # this is Haskell's library installer. a package manager in itself
-sudo apt-get install libpulse-dev # pulse audio development libraries
-sudo apt-get install libsndfile-dev # for sound output
+    sudo apt-get install ghc6 c2hs cabal-install libpulse-dev libsndfile1-dev
 
-# an experimental Haskell bidning for pulseaudio. Note that you don't need sudo for this, it installs in ~/.cabal
-cabal install pulse-simple  
+`c2hs` ought to be gotten via cabal, but it didn't work with the stack snapshot
+I used. If somebody knows why I'd be happy to put it in my cabal package setup
+instead.
 
-# a Haskell bidning for libsndfile. Note that you don't need sudo for this, it installs in ~/.cabal
-cabal install hsndfile  
+Then the usual for building:
 
-./build.sh
-./synth.sh # run it. you should hear some sort of sound. hopefully nothing to offensive to your ears, I make no promises though! (turn down your speakers)
-./synth.sh --realtime # same as above, except that it buffers in small chunks rather than the whole sound. It is still extremely choppy, don't bother.
-./synth.sh outputfile.wav # write to a specified file
+    cabal sandbox init
+    cabal install --dependencies-only
+    cabal build
+
+As of now (unless I forgot to upgrade this README) the sound it outputs is hard coded. So, just run it, and you'll hear something, or it will generate a file.
+
+Run it with default options. It should pause for a couple seconds, and then you should hear some sort of sound. Hopefully nothing to offensive to your ears, I make no promises though! (turn down your speakers)
+
+    dist/build/HaskellSynth/HaskellSynth
+
+Try it in "realtime" mode. This one buffers the sound into small chunks, instead of the whole sound at once. This is of course a requirement it's set to output a sound that doesn't have a finite length. But, it may be choppy depending on how complicated the sound is, and how fast your computer is:
+
+    dist/build/HaskellSynth/HaskellSynth --realtime
+
+Output the sound to a file:
+
+    dist/build/HaskellSynth/HaskellSynth outputfile.wav
 
 Let me know if it doesn't work and I'll add the step I forgot!
 
-
 Example Output:
+
+    # TODO - I need to actually host the following files again. Sorry :-(
 
 Here's more or less the first real beat I made. This was the hardcoded output at one point. I'm too lazy to find which revision number it was:
 

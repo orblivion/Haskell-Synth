@@ -2,3 +2,6 @@
 *.hi
 *.out
 .*.swp
+.cabal-sandbox
+cabal.sandbox.config
+dist

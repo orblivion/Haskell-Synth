@@ -8,7 +8,10 @@
     UndecidableInstances
     #-}
 
-
+-- NOTE - This module isn't even used in this project. This was an experimental
+-- next move that I was overzealously planning while I was playing with
+-- typeclasses. Looking back years later, it probably adds no value to this
+-- program so I will probably delete it, but I will doublecheck first.
 
 module Units where
 
