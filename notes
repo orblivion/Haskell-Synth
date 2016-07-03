@@ -43,3 +43,7 @@ Q = resonance
 otherwise without resonance its more of what an EQ would
 do
 from this page http://www.soundonsound.com/sos/oct99/articles/synthsecrets.htm
+
+Easy looking string pluck generator algorithm: https://news.ycombinator.com/item?id=11918983
+
+Use async/par to make it go faster.
