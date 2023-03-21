@@ -31,14 +31,15 @@ Output the sound to a file:
 
 Let me know if it doesn't work and I'll add the step I forgot!
 
-Example Output:
+# Example Output:
 
-    # TODO - I need to actually host the following files again. Sorry :-(
+I made various sounds over the course of making this. I lost track of what sound went with what version of this codebase. I don't think any of these correspond to the latest version of the code. I'm just going to post these here for posterity.
 
-Here's more or less the first real beat I made. This was the hardcoded output at one point. I'm too lazy to find which revision number it was:
+Warning, these might be a little loud.
 
-http://static.danielkrol.com/assorted/synth/beat.ogg
-
-Added the closest thing I could to a hi hat. More like a tweet, but it serves about the same purpose:
-
-http://static.danielkrol.com/assorted/synth/beatwithhats.ogg
+* [A beat sequence](example-output/beat.ogg?raw=true) - Possibly the first one I made.
+* [Similar beat with something like high hats](example-output/beatwithhats.ogg?raw=true) - More like tweets
+* [LFO on an LFO](example-output/example.ogg?raw=true) and it sounds like also modulating the square pulse width (no filters were used)
+* [LFO on an LFO with a second sound](example-output/example2.ogg?raw=true)
+* [A minor chord](example-output/square_sequence_2.ogg?raw=true)
+* [A minor chord 2](example-output/square_sequence.ogg?raw=true)
