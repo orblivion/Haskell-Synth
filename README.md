@@ -39,7 +39,7 @@ Warning, these might be a little loud.
 
 * [A beat sequence](example-output/beat.ogg?raw=true) - Possibly the first one I made.
 * [Similar beat with something like high hats](example-output/beatwithhats.ogg?raw=true) - More like tweets
-* [LFO on an LFO](example-output/example.ogg?raw=true) and it sounds like also modulating the square pulse width (no filters were used)
-* [LFO on an LFO with a second sound](example-output/example2.ogg?raw=true)
+* [LFO modulated by something, probably an envelope](example-output/example.ogg?raw=true) and it sounds like also modulating the square pulse width (no filters were used)
+* [LFO modulated by something, probably an envelope, with a second sound](example-output/example2.ogg?raw=true)
 * [A minor chord](example-output/square_sequence_2.ogg?raw=true)
 * [A minor chord 2](example-output/square_sequence.ogg?raw=true)
